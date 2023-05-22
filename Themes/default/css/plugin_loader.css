@@ -1,0 +1,31 @@
+.plugins {
+	display: grid;
+}
+
+.plugins .windowbg {
+	box-shadow: 0 -2px 2px rgba(0, 0, 0, .1) !important;
+}
+
+.plugins .windowbg:hover {
+	box-shadow: 0 2px 5px rgba(0, 0, 0, .3) !important;
+}
+
+.plugins img:hover {
+	cursor: pointer;
+	box-shadow: 0px 1px 15px 3px #000;
+	border-radius: 100%;
+}
+
+.plugins div.floatleft {
+	width: 80%;
+}
+
+.plugins div.floatleft .author_info {
+	display: inline-block;
+	margin-top: 10px;
+	border-top: 1px solid gray;
+}
+
+.plugins div.floatright {
+	margin-top: 1em;
+}
