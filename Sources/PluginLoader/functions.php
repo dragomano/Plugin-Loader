@@ -53,9 +53,15 @@ function loadPluginJS($js_name)
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
 	$plugin_name = basename(dirname($file, 2));
 
-	$js = new MatthiasMullie\Minify\JS;
-	$js->add(PLUGINS_DIR . '/' . $plugin_name . '/scripts/' . $js_name);
-	$js->minify($settings['default_theme_dir'] . '/scripts/' . $plugin_name . '_' . $js_name);
+	$source_file = PLUGINS_DIR . '/' . $plugin_name . '/scripts/' . $js_name;
+	$target_file = $settings['default_theme_dir'] . '/scripts/' . $plugin_name . '_' . $js_name;
+
+	if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file))
+	{
+		$js = new MatthiasMullie\Minify\JS;
+		$js->add($source_file);
+		$js->minify($target_file);
+	}
 
 	loadJavaScriptFile($plugin_name . '_' . $js_name, ['minimize' => true]);
 }
@@ -67,9 +73,15 @@ function loadPluginCSS($css_name)
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
 	$plugin_name = basename(dirname($file, 2));
 
-	$css = new MatthiasMullie\Minify\CSS;
-	$css->add(PLUGINS_DIR . '/' . $plugin_name . '/styles/' . $css_name);
-	$css->minify($settings['default_theme_dir'] . '/css/' . $plugin_name . '_' . $css_name);
+	$source_file = PLUGINS_DIR . '/' . $plugin_name . '/styles/' . $css_name;
+	$target_file = $settings['default_theme_dir'] . '/css/' . $plugin_name . '_' . $css_name;
+
+	if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file))
+	{
+		$css = new MatthiasMullie\Minify\CSS;
+		$css->add($source_file);
+		$css->minify($target_file);
+	}
 
 	loadCSSFile($plugin_name . '_' . $css_name);
 }
