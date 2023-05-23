@@ -3,7 +3,8 @@ class PluginLoader {
 		this.workUrl = smf_scripturl + '?action=admin;area=plugins'
 	}
 
-	async toggle(target) {
+	async toggle(e) {
+		const target = e.target
 		const plugin = target.dataset.id
 		const status = target.dataset.status
 
@@ -21,8 +22,7 @@ class PluginLoader {
 		if (! response.ok)
 			return console.error(response)
 
-		if (status === 'on')
-		{
+		if (status === 'on') {
 			target.setAttribute('src', smf_images_url + '/admin/switch_off.png')
 			target.setAttribute('alt', 'off')
 			target.setAttribute('data-status', 'off')

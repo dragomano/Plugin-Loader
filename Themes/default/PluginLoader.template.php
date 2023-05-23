@@ -9,7 +9,7 @@ function template_main()
 		<h3 class="catbg">', $txt['pl_plugin_manager'], '</h3>
 	</div>
 	<div class="information">', $txt['pl_plugin_manager_info'], '</div>
-	<div class="plugins" x-data>';
+	<div class="plugins">';
 
 	foreach ($context['pl_plugins'] as $id => $plugin)
 	{
@@ -43,7 +43,7 @@ function template_main()
 				</div>
 			</div>
 			<div class="floatright">
-				<img @click.self="plugin.toggle($event.target)" data-id="', $id, '" data-status="', $toggle, '" src="', $settings['default_images_url'], '/admin/switch_', $toggle, '.png" alt="', $toggle, '">
+				<img class="plugin_toggle" data-id="', $id, '" data-status="', $toggle, '" src="', $settings['default_images_url'], '/admin/switch_', $toggle, '.png" alt="', $toggle, '">
 			</div>
 		</div>';
 	}
@@ -53,5 +53,7 @@ function template_main()
 
 	<script defer>
 		const plugin = new PluginLoader();
+		const button = document.querySelector(".plugin_toggle");
+		button.addEventListener("click", (e) => plugin.toggle(e));
 	</script>';
 }

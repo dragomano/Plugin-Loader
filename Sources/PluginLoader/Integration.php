@@ -66,9 +66,9 @@ class Integration
 
 		$context['page_title'] = $txt['pl_plugin_manager'];
 
-		loadJavaScriptFile('https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js', ['external' => true, 'defer' => true]);
-		loadJavaScriptFile('plugin_loader.js', ['minimize' => true]);
 		loadCSSFile('plugin_loader.css');
+		loadJavaScriptFile('plugin_loader.js', ['minimize' => true]);
+
 		loadTemplate('PluginLoader');
 
 		$this->preparePluginList();
