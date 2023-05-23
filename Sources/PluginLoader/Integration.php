@@ -106,7 +106,7 @@ class Integration
 		$context['pl_enabled_plugins'] = empty($plugins) ? [] : explode(',', $plugins);
 		$context['pl_plugins'] = [];
 
-		$plugins = glob(dirname(__DIR__, 2) . '/Plugins/**/plugin-info.xml', GLOB_BRACE);
+		$plugins = glob(PLUGINS_DIR . '/**/plugin-info.xml', GLOB_BRACE);
 
 		foreach ($plugins as $plugin)
 		{

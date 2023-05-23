@@ -27,9 +27,7 @@ function loadPluginLanguage($lang = '')
 	global $user_info, $txt;
 
 	$lang = empty($lang) ? $user_info['language'] : $lang;
-
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
-
 	$language_file = dirname($file, 2) . '/languages/' . $lang . '.php';
 
 	if (is_file($language_file))
@@ -50,13 +48,13 @@ function loadPluginTemplate($template_name)
 
 function loadPluginJS($js_name)
 {
-	global $boarddir, $settings;
+	global $settings;
 
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
 	$plugin_name = basename(dirname($file, 2));
 
 	$js = new MatthiasMullie\Minify\JS;
-	$js->add($boarddir . '/Plugins/' . $plugin_name . '/scripts/' . $js_name);
+	$js->add(PLUGINS_DIR . '/' . $plugin_name . '/scripts/' . $js_name);
 	$js->minify($settings['default_theme_dir'] . '/scripts/' . $plugin_name . '_' . $js_name);
 
 	loadJavaScriptFile($plugin_name . '_' . $js_name, ['minimize' => true]);
@@ -64,13 +62,13 @@ function loadPluginJS($js_name)
 
 function loadPluginCSS($css_name)
 {
-	global $boarddir, $settings;
+	global $settings;
 
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
 	$plugin_name = basename(dirname($file, 2));
 
 	$css = new MatthiasMullie\Minify\CSS;
-	$css->add($boarddir . '/Plugins/' . $plugin_name . '/styles/' . $css_name);
+	$css->add(PLUGINS_DIR . '/' . $plugin_name . '/styles/' . $css_name);
 	$css->minify($settings['default_theme_dir'] . '/css/' . $plugin_name . '_' . $css_name);
 
 	loadCSSFile($plugin_name . '_' . $css_name);
@@ -78,11 +76,8 @@ function loadPluginCSS($css_name)
 
 function getPluginUrl(): string
 {
-	global $boardurl;
-
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
-
 	$plugin_name = basename(dirname($file, 2));
 
-	return $boardurl . '/Plugins/' . $plugin_name;
+	return PLUGINS_URL . '/' . $plugin_name;
 }

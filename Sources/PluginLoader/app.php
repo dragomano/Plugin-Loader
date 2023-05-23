@@ -15,14 +15,16 @@
 if (!defined('SMF'))
 	die('No direct access...');
 
-require_once __DIR__ . '/functions.php';
+global $boarddir, $boardurl, $plugins;
 
+defined('PLUGINS_DIR') || define('PLUGINS_DIR', $boarddir . '/Plugins');
+defined('PLUGINS_URL') || define('PLUGINS_URL', $boardurl . '/Plugins');
+
+require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/Integration.php';
 
 $loader = new Bugo\PluginLoader\Integration();
 $loader->hooks();
-
-global $plugins;
 
 $enabled_plugins = empty($plugins) ? [] : explode(',', $plugins);
 
@@ -31,7 +33,7 @@ if (empty($enabled_plugins))
 
 foreach ($enabled_plugins as $plugin)
 {
-	$file = dirname(__DIR__, 2) . '/Plugins/' . $plugin . '/sources/Integration.php';
+	$file = PLUGINS_DIR . '/' . $plugin . '/sources/Integration.php';
 	if (is_file($file))
 	{
 		add_integration_function('integrate_pre_load', 'Integration::hooks#', false, $file);
