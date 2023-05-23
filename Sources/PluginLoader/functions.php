@@ -50,24 +50,30 @@ function loadPluginTemplate($template_name)
 
 function loadPluginJS($js_name)
 {
-	global $boardurl;
+	global $boarddir, $settings;
 
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
-
 	$plugin_name = basename(dirname($file, 2));
 
-	loadJavaScriptFile($boardurl . '/Plugins/' . $plugin_name . '/scripts/' . $js_name, ['external' => true]);
+	$js = new MatthiasMullie\Minify\JS;
+	$js->add($boarddir . '/Plugins/' . $plugin_name . '/scripts/' . $js_name);
+	$js->minify($settings['default_theme_dir'] . '/scripts/' . $plugin_name . '_' . $js_name);
+
+	loadJavaScriptFile($plugin_name . '_' . $js_name, ['minimize' => true]);
 }
 
 function loadPluginCSS($css_name)
 {
-	global $boardurl;
+	global $boarddir, $settings;
 
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
-
 	$plugin_name = basename(dirname($file, 2));
 
-	loadCSSFile($boardurl . '/Plugins/' . $plugin_name . '/styles/' . $css_name, ['external' => true]);
+	$css = new MatthiasMullie\Minify\CSS;
+	$css->add($boarddir . '/Plugins/' . $plugin_name . '/styles/' . $css_name);
+	$css->minify($settings['default_theme_dir'] . '/css/' . $plugin_name . '_' . $css_name);
+
+	loadCSSFile($plugin_name . '_' . $css_name);
 }
 
 function getPluginUrl(): string
