@@ -27,15 +27,18 @@ function template_main()
 		<div class="windowbg">
 			<div class="sub_bar">
 				<h4 class="subbg">
-					', empty($plugin->website) ? '' : '<a class="bbc_link" href="', $plugin->website, '">', $plugin->name, empty($plugin->website) ? '' : '</a>', ' <span class="amt">', $plugin->version, '</span>
-					<span class="floatright">', empty($plugin->license['url']) ? '' : '<a class="bbc_link" href="', $plugin->license['url'], '">', $plugin->license, empty($plugin->license['url']) ? '' : '</a>', '</span>
+					', empty($plugin['website']) ? '' : '<a class="bbc_link" href="', $plugin['website'], '">', $plugin['name'], empty($plugin['website']) ? '' : '</a>', ' <span class="amt">', $plugin['version'], '</span>
+					<span class="floatright">
+						', empty($plugin['license']['@attributes']['url']) ? '' : '<a class="bbc_link" href="', $plugin['license']['@attributes']['url'], '">', $plugin['license']['value'], empty($plugin['license']['@attributes']['url']) ? '' : '</a>', '
+					</span>
 				</h4>
 			</div>
 			<div class="floatleft">
-				<div>', $plugin->description->{$context['user']['language']} ?? $plugin->description->english, '</div>
+				<div>', $plugin['description'][$context['user']['language']] ?? $plugin['description']['english'], '</div>
 				<div class="smalltext">
 					<span class="author_info">
-						', $txt['author'], ': ', empty($plugin->author['url']) ? '' : '<a class="bbc_link" href="', $plugin->author['url'], '">', $plugin->author, empty($plugin->author['url']) ? '' : '</a>', '
+						', $txt['author'], ': ',
+						empty($plugin['author']['@attributes']['url']) ? '' : '<a class="bbc_link" href="', $plugin['author']['@attributes']['url'], '">', $plugin['author']['value'], empty($plugin['author']['@attributes']['url']) ? '' : '</a>', '
 					</span>
 				</div>
 			</div>

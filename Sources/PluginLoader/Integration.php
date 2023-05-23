@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  * Integration.php
@@ -13,6 +13,8 @@
  */
 
 namespace Bugo\PluginLoader;
+
+use SimpleXMLElement;
 
 if (!defined('SMF'))
 	die('No direct access...');
@@ -80,15 +82,11 @@ class Integration
 				redirectexit('action=admin;area=plugins');
 
 			if ($data['status'] === 'on')
-			{
 				$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
 					return $item !== $data['plugin'];
 				});
-			}
 			else
-			{
 				$context['pl_enabled_plugins'][] = $data['plugin'];
-			}
 
 			sort($context['pl_enabled_plugins']);
 
@@ -98,7 +96,6 @@ class Integration
 		}
 	}
 
-	/** @noinspection PhpComposerExtensionStubsInspection */
 	public function preparePluginList()
 	{
 		global $context, $plugins;
@@ -122,8 +119,63 @@ class Integration
 				}
 
 				$content = preg_replace('~\s*<(!DOCTYPE|xsl)[^>]+?>\s*~i', '', $content);
-				$context['pl_plugins'][$id] = simplexml_load_string($content);
+				$xmldata = simplexml_load_string($content);
+				$context['pl_plugins'][$id] = $this->escapeArray($this->xml2array($xmldata));
 			}
 		}
+	}
+
+	private function xml2array(SimpleXMLElement $xml): array
+	{
+		$parser = function (SimpleXMLElement $xml, array $collection = []) use (&$parser) {
+			$nodes = $xml->children();
+			$attributes = $xml->attributes();
+
+			if (0 !== count($attributes))
+			{
+				foreach ($attributes as $attrName => $attrValue)
+					$collection['@attributes'][$attrName] = strval($attrValue);
+			}
+
+			if (0 === $nodes->count())
+			{
+				if ($xml->attributes())
+					$collection['value'] = strval($xml);
+				else
+					$collection = strval($xml);
+
+				return $collection;
+			}
+
+			foreach ($nodes as $nodeName => $nodeValue)
+			{
+				if (count($nodeValue->xpath('../' . $nodeName)) < 2)
+				{
+					$collection[$nodeName] = $parser($nodeValue);
+					continue;
+				}
+
+				$collection[$nodeName][] = $parser($nodeValue);
+			}
+
+			return $collection;
+		};
+
+		return $parser($xml);
+	}
+
+	private function escapeArray(array $data): array
+	{
+		global $smcFunc;
+
+		foreach ($data as $key => $value)
+		{
+			if (is_array($value))
+				$data[$key] = $this->escapeArray($value);
+			else
+				$data[$key] = $smcFunc['htmlspecialchars']($value, ENT_QUOTES);
+		}
+
+		return $data;
 	}
 }
