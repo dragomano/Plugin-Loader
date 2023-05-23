@@ -9,6 +9,7 @@
 
 	<install for="2.1.*">
 		<hook hook="integrate_pre_include" file="$sourcedir/PluginLoader/app.php"/>
+		<code>install.php</code>
 		<require-dir name="Sources/PluginLoader" destination="$sourcedir">Adding source files</require-dir>
 		<require-file name="Themes/default/PluginLoader.template.php" destination="$themedir">Adding main template file</require-file>
 		<require-file name="Themes/default/css/plugin_loader.css" destination="$themedir/css">Adding CSS file</require-file>
