@@ -6,9 +6,9 @@ function template_main()
 
 	echo '
 	<div class="cat_bar">
-		<h3 class="catbg">', $txt['pl_plugin_manager'], '</h3>
+		<h3 class="catbg">', $txt['pl_title'], '</h3>
 	</div>
-	<div class="information">', $txt['pl_plugin_manager_info'], '</div>
+	<div class="information">', sprintf($txt['pl_info'], PLUGINS_DIR), '</div>
 	<div class="plugins">';
 
 	foreach ($context['pl_plugins'] as $id => $plugin)
@@ -51,9 +51,44 @@ function template_main()
 	echo '
 	</div>
 
-	<script defer>
+	<script>
 		const plugin = new PluginLoader();
 		const button = document.querySelector(".plugin_toggle");
 		button.addEventListener("click", (e) => plugin.toggle(e));
 	</script>';
+}
+
+function template_upload()
+{
+	global $context, $txt, $scripturl;
+
+	if (!empty($context['upload_error']))
+		echo '
+	<div class="errorbox">', $context['upload_error'], '</div>';
+
+	if (!empty($context['upload_success']))
+		echo '
+	<div class="infobox">', $context['upload_success'], '</div>';
+
+	echo '
+	<div id="admin_form_wrapper">
+		<div class="cat_bar">
+			<h3 class="catbg">', $txt['package_upload_title'], '</h3>
+		</div>
+		<div class="windowbg">
+			<form action="', $scripturl, '?action=admin;area=plugins;get;sa=upload" method="post" accept-charset="', $context['character_set'], '" enctype="multipart/form-data">
+				<dl class="settings">
+					<dt>
+						<strong>', $txt['package_upload_select'], ':</strong>
+					</dt>
+					<dd>
+						<input type="hidden" name="MAX_FILE_SIZE" value="', $context['max_file_size'], '">
+						<input type="file" name="package" accept="application/zip">
+					</dd>
+				</dl>
+				<input type="submit" value="', $txt['upload'], '" class="button">
+				<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '">
+			</form>
+		</div>
+	</div>';
 }
