@@ -3,6 +3,7 @@
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 ![PHP](https://img.shields.io/badge/PHP-^7.0-blue.svg?style=flat)
+[![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
 
 [Описание на английском](README.md)
 
