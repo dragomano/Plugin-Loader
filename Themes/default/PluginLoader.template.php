@@ -44,6 +44,7 @@ function template_main()
 			</div>
 			<div class="floatright">
 				<img class="plugin_toggle" data-id="', $id, '" data-status="', $toggle, '" src="', $settings['default_images_url'], '/admin/switch_', $toggle, '.png" alt="', $toggle, '">
+				<span class="main_icons plugin_remove" title="', $txt['remove'], '"', $toggle === 'on' ? ' style="display: none"' : '', '></span>
 			</div>
 		</div>';
 	}
@@ -54,7 +55,9 @@ function template_main()
 	<script>
 		const plugin = new PluginLoader();
 		const button = document.querySelector(".plugin_toggle");
+		const removeButton = button.nextElementSibling
 		button.addEventListener("click", (e) => plugin.toggle(e));
+		removeButton.addEventListener("click", (e) => plugin.remove(e));
 	</script>';
 }
 

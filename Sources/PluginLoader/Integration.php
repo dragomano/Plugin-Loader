@@ -107,26 +107,35 @@ class Integration
 
 		$this->preparePluginList();
 
-		if (isset($_REQUEST['toggle']))
+		if (isset($_REQUEST['toggle']) || isset($_REQUEST['remove']))
 		{
 			$input = file_get_contents('php://input');
 			$data  = smf_json_decode($input, true) ?? [];
 
-			if (empty($data))
+			if (empty($data) || empty($data['plugin']))
 				redirectexit('action=admin;area=plugins');
 
-			if ($data['status'] === 'on')
-				$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
-					return $item !== $data['plugin'];
-				});
-			else
-				$context['pl_enabled_plugins'][] = $data['plugin'];
+			if (isset($data['status']))
+			{
+				if ($data['status'] === 'on')
+					$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
+						return $item !== $data['plugin'];
+					});
+				else
+					$context['pl_enabled_plugins'][] = $data['plugin'];
 
-			sort($context['pl_enabled_plugins']);
+				sort($context['pl_enabled_plugins']);
 
-			require_once $sourcedir . '/Subs-Admin.php';
+				require_once $sourcedir . '/Subs-Admin.php';
 
-			updateSettingsFile(['plugins' => implode(',', $context['pl_enabled_plugins'])]);
+				updateSettingsFile(['plugins' => implode(',', $context['pl_enabled_plugins'])]);
+
+				return;
+			}
+
+			require_once $sourcedir . '/Subs-Package.php';
+
+			deltree(PLUGINS_DIR . '/' . $data['plugin']);
 		}
 	}
 
