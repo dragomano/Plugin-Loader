@@ -118,11 +118,22 @@ class Integration
 			if (isset($data['status']))
 			{
 				if ($data['status'] === 'on')
+				{
 					$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
 						return $item !== $data['plugin'];
 					});
+				}
 				else
+				{
+					if (!empty($context['pl_plugins'][$data['plugin']]['database']))
+					{
+						db_extend('packages');
+
+						require PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin'] . DIRECTORY_SEPARATOR . $context['pl_plugins'][$data['plugin']]['database'];
+					}
+
 					$context['pl_enabled_plugins'][] = $data['plugin'];
+				}
 
 				sort($context['pl_enabled_plugins']);
 
@@ -135,7 +146,7 @@ class Integration
 
 			require_once $sourcedir . '/Subs-Package.php';
 
-			deltree(PLUGINS_DIR . '/' . $data['plugin']);
+			deltree(PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin']);
 		}
 	}
 

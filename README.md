@@ -27,8 +27,6 @@ Plugins are turned on and off at the touch of a button. To install, simply place
 
 The list of currently active plugins is stored in the global variable __$plugins__ in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the Integration.php_ file of the plugin, or _rename/remove the hooks_ method in the plugin class.
 
-Plugins that require creation of tables in the database are NOT supported in the current version.
-
 ## Example plugin structure
 
 ```
@@ -73,6 +71,9 @@ example_plugin/
 	<website>https://plugin-site.com</website>
 </plugin>
 ```
+
+Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in __plugin-info.xml__.
+In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
 
 ## Example Integration.php file
 
