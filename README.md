@@ -134,4 +134,5 @@ The following functions are provided to work with plugin files:
 
 ## Examples of working plugins
 
-* [Profile Starsigns](https://e.pcloud.link/publink/show?code=XZjmFuZ0SzABxCOdluGxcu5nu1Ls49GAybX)
+* [Profile Starsigns](https://drive.proton.me/urls/8ZX5G1QXSR#WG0Yl99C0NJw)
+* [Font Awesome](https://drive.proton.me/urls/ABF7BBDC80#Eo0cVWRbrbxi)
