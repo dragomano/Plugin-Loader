@@ -28,15 +28,21 @@ function loadPluginLanguage($lang = '')
 
 	$lang = empty($lang) ? $user_info['language'] : $lang;
 	$file = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file'];
-	$language_file = dirname($file, 2) . '/languages/' . $lang . '.php';
+	$plugin_name = basename(dirname($file, 2)) . '_plugin';
 
-	if (is_file($language_file))
-	{
-		require_once $language_file;
+	if (isset($txt[$plugin_name]))
 		return;
+
+	$languages = array_unique(['english', $lang]);
+
+	$pluginLanguages = [];
+	foreach ($languages as $language) {
+		$langFile = dirname($file, 2) . '/languages/' . $language . '.php';
+		$pluginLanguages[$language] = is_file($langFile) ? require_once $langFile : [];
 	}
 
-	require_once dirname($file, 2) . '/languages/english.php';
+	if (is_array($pluginLanguages['english']))
+		$txt[$plugin_name] = array_merge($pluginLanguages['english'], $pluginLanguages[$lang]);
 }
 
 function loadPluginTemplate($template_name)
