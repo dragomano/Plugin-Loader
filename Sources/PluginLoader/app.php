@@ -36,6 +36,7 @@ foreach ($enabled_plugins as $plugin)
 	$file = PLUGINS_DIR . '/' . $plugin . '/sources/Integration.php';
 	if (is_file($file))
 	{
-		add_integration_function('integrate_pre_load', 'Integration::hooks#', false, $file);
+		$className = str_replace(' ', '', ucwords(str_replace('_', ' ', $plugin)));
+		add_integration_function('integrate_pre_load', 'PluginLoader\\Plugins\\' . $className . '\\Integration::hooks#', false, $file);
 	}
 }

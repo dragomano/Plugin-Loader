@@ -54,10 +54,12 @@ function template_main()
 
 	<script>
 		const plugin = new PluginLoader();
-		const button = document.querySelector(".plugin_toggle");
-		const removeButton = button.nextElementSibling
-		button.addEventListener("click", (e) => plugin.toggle(e));
-		removeButton.addEventListener("click", (e) => plugin.remove(e));
+		const toggleButtons = document.querySelectorAll(".plugin_toggle");
+		toggleButtons.forEach(function (button) {
+			button.addEventListener("click", (e) => plugin.toggle(e));
+			const removeButton = button.nextElementSibling;
+			removeButton.addEventListener("click", (e) => plugin.remove(e));
+		});
 	</script>';
 }
 
