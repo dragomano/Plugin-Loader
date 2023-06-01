@@ -73,8 +73,7 @@ example_plugin/
 </plugin>
 ```
 
-Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in __plugin-info.xml__.
-In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
+Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in __plugin-info.xml__. In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
 
 ## Example Integration.php file
 
@@ -93,6 +92,8 @@ In the specified file, you can place a script to create the necessary tables whe
  * @version 0.1
  */
 
+namespace PluginLoader\Plugins\Example;
+
 if (!defined('SMF'))
 	die('No direct access...');
 
@@ -109,6 +110,9 @@ class Integration
 		loadPluginLanguage();
 
 		// Your code
+
+		// Use language strings
+		// $txt['example_plugin']['key']
 	}
 
 	public function menuButtons($buttons): void

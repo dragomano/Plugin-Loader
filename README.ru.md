@@ -73,8 +73,7 @@ example_plugin/
 </plugin>
 ```
 
-Плагины, требующие для своей работы создание таблиц в базе данных, должны содержать узел `<database>имя_файла.php</database>` в __plugin-info.xml__.
-В указанном файле можно разместить скрипт создания нужных таблиц при включении плагина, если они ещё не созданы.
+Плагины, требующие для своей работы создание таблиц в базе данных, должны содержать узел `<database>имя_файла.php</database>` в __plugin-info.xml__. В указанном файле можно разместить скрипт создания нужных таблиц при включении плагина, если они ещё не созданы.
 
 ## Пример файла Integration.php
 
@@ -93,6 +92,8 @@ example_plugin/
  * @version 0.1
  */
 
+namespace PluginLoader\Plugins\Example;
+
 if (!defined('SMF'))
 	die('No direct access...');
 
@@ -109,6 +110,9 @@ class Integration
 		loadPluginLanguage();
 
 		// Your code
+
+		// Use language strings
+		// $txt['example_plugin']['key']
 	}
 
 	public function menuButtons($buttons): void
