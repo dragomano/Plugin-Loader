@@ -22,6 +22,7 @@ defined('PLUGINS_URL') || define('PLUGINS_URL', $boardurl . '/Plugins');
 
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/Integration.php';
+require_once __DIR__ . '/Plugin.php';
 
 $loader = new Bugo\PluginLoader\Integration();
 $loader->hooks();
@@ -33,10 +34,12 @@ if (empty($enabled_plugins))
 
 foreach ($enabled_plugins as $plugin)
 {
-	$file = PLUGINS_DIR . '/' . $plugin . '/sources/Integration.php';
+	$file = PLUGINS_DIR . '/' . $plugin . '/sources/plugin.php';
 	if (is_file($file))
 	{
-		$className = str_replace(' ', '', ucwords(str_replace('_', ' ', $plugin)));
-		add_integration_function('integrate_pre_load', 'PluginLoader\\Plugins\\' . $className . '\\Integration::hooks#', false, $file);
+		$class = require_once $file;
+
+		if ($class instanceof Bugo\PluginLoader\Plugin)
+			$class->hooks();
 	}
 }

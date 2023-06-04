@@ -5,13 +5,13 @@
 ![PHP](https://img.shields.io/badge/PHP-^7.0-blue.svg?style=flat)
 [![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
 
-[Описание на английском](README.md)
+[Description in English](README.md)
 
 Этот концепт-мод вдохновлён системой плагинов Wedge. Он добавляет поддержку плагинов в SMF.
 
-Плагины — это автономные модификации, запускаемые с помощью одного единственного хука — *integrate_pre_load*.
+Плагины — это автономные модификации, которым не требуется установка или удаление через Менеджер пакетов. Они не вносят изменения в файлы SMF и работают полностью на хуках.
 
-Ключевым source-файлом у плагина является __Integration.php__ с одноименным классом внутри и методом __hooks__, выполняемым через хук *integrate_pre_load*. Также в директории каждого плагина должен находиться файл __plugin-info.xml__, содержащий ключевые данные плагина:
+Ключевым source-файлом у плагина является __plugin.php__ с анонимным классом внутри и методом __hooks__, выполняемым через хук *integrate_pre_load*. Также в директории каждого плагина должен находиться файл __plugin-info.xml__, содержащий ключевые данные плагина:
 
 	* название
 	* описание
@@ -26,7 +26,7 @@
 
 ![](preview.png)
 
-Список текущих активных плагинов форума хранится в глобальной переменной __$plugins__ в файле _Settings.php_. Для отключения проблемного плагина достаточно _удалить его название из переменной $plugins_, либо _переименовать папку плагина_, либо _переименовать файл Integration.php_ плагина, либо _переименовать/убрать метод hooks_ в классе плагина.
+Список текущих активных плагинов форума хранится в глобальной переменной __$plugins__ в файле _Settings.php_. Для отключения проблемного плагина достаточно _удалить его название из переменной $plugins_, либо _переименовать папку плагина_, либо _переименовать файл plugin.php_ плагина.
 
 ## Пример структуры плагина
 
@@ -41,7 +41,7 @@ example_plugin/
 		russian.php
 	sources/
 		index.php
-		Integration.php
+		plugin.php
 	templates/
 		index.php
 		Example.template.php
@@ -75,13 +75,13 @@ example_plugin/
 
 Плагины, требующие для своей работы создание таблиц в базе данных, должны содержать узел `<database>имя_файла.php</database>` в __plugin-info.xml__. В указанном файле можно разместить скрипт создания нужных таблиц при включении плагина, если они ещё не созданы.
 
-## Пример файла Integration.php
+## Пример файла plugin.php
 
 ```php
 <?php
 
 /**
- * Integration.php
+ * plugin.php
  *
  * @package Example
  * @link https://plugin-site.com
@@ -92,12 +92,12 @@ example_plugin/
  * @version 0.1
  */
 
-namespace PluginLoader\Plugins\Example;
+use Bugo\PluginLoader\Plugin;
 
 if (!defined('SMF'))
 	die('No direct access...');
 
-class Integration
+return class extends Plugin
 {
 	public function hooks(): void
 	{
@@ -119,11 +119,11 @@ class Integration
 	{
 		// var_dump($buttons);
 	}
-}
+};
 
 ```
 
-Как видите, все требуемые плагином хуки перечисляются в методе `hooks`, который выполняется, если плагин включён.
+Как видите, все требуемые плагином хуки перечисляются в методе `hooks`, который выполняется только при включении плагина.
 
 ## Вспомогательные функции
 

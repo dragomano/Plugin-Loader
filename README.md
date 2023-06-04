@@ -9,9 +9,9 @@
 
 This concept mod is inspired by the Wedge plugin system. It adds plugin support to SMF.
 
-Plugins are standalone modifications that are run with a single hook — *integrate_pre_load*.
+Plugins are standalone modifications that do not need to be installed or removed through the Package Manager. They don't make changes to SMF files and run entirely on hooks.
 
-The key source file of the plugin is __Integration.php__ with the class of the same name and the __hooks__ method, which is executed through the *integrate_pre_load* hook. Also in the directory of each plugin should be a file __plugin-info.xml__, which contains the key data of the plugin:
+The key source file of the plugin is __plugin.php__ with the anonymous class and the __hooks__ method, which is executed through the *integrate_pre_load* hook. Also in the directory of each plugin should be a file __plugin-info.xml__, which contains the key data of the plugin:
 
 	* name
 	* description
@@ -26,7 +26,7 @@ Plugins are turned on and off at the touch of a button. To install, simply place
 
 ![](preview.png)
 
-The list of currently active plugins is stored in the global variable __$plugins__ in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the Integration.php_ file of the plugin, or _rename/remove the hooks_ method in the plugin class.
+The list of currently active plugins is stored in the global variable __$plugins__ in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the plugin.php_ file of the plugin.
 
 ## Example plugin structure
 
@@ -41,7 +41,7 @@ example_plugin/
 		russian.php
 	sources/
 		index.php
-		Integration.php
+		plugin.php
 	templates/
 		index.php
 		Example.template.php
@@ -75,13 +75,13 @@ example_plugin/
 
 Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in __plugin-info.xml__. In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
 
-## Example Integration.php file
+## Example plugin.php file
 
 ```php
 <?php
 
 /**
- * Integration.php
+ * plugin.php
  *
  * @package Example
  * @link https://plugin-site.com
@@ -92,12 +92,12 @@ Plugins that require creation of tables in the database for their work must cont
  * @version 0.1
  */
 
-namespace PluginLoader\Plugins\Example;
+use Bugo\PluginLoader\Plugin;
 
 if (!defined('SMF'))
 	die('No direct access...');
 
-class Integration
+return class extends Plugin
 {
 	public function hooks(): void
 	{
@@ -119,7 +119,7 @@ class Integration
 	{
 		// var_dump($buttons);
 	}
-}
+};
 
 ```
 
