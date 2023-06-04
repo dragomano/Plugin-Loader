@@ -107,12 +107,12 @@ return class extends Plugin
 
 	public function loadTheme(): void
 	{
-		loadPluginLanguage();
+		$this->loadLanguage();
 
 		// Your code
 
 		// Use language strings
-		// $txt['example_plugin']['key']
+		// var_dump($this->txt['key'])
 	}
 
 	public function menuButtons($buttons): void
@@ -125,16 +125,28 @@ return class extends Plugin
 
 Как видите, все требуемые плагином хуки перечисляются в методе `hooks`, который выполняется только при включении плагина.
 
-## Вспомогательные функции
+## Пример языкового файла плагина
 
-Для работы с файлами плагинов предусмотрены следующие функции:
+```php
+<?php
 
-* `loadPluginSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
-* `loadPluginLanguage($lang = '')` - подключение языкового PHP-файла `$lang` из поддиректории `languages` текущего плагина (по умолчанию `$lang = $context['user']['language']`)
-* `loadPluginTemplate($template_name)` - подключение PHP-файла шаблона `$template_name` из поддиректории `templates` текущего плагина
-* `loadPluginJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
-* `loadPluginCSS($css_name)` - подключение CSS-файла `$css_name` из поддиректории `styles` текущего плагина
-* `getPluginUrl()` - возвращает URL-путь к директории текущего плагина
+return [
+	'key1' => 'Текст 1',
+	'key2' => 'Текст 2',
+];
+
+```
+
+## Вспомогательные методы
+
+Для работы внутри классов плагинов предусмотрены следующие методы:
+
+* `loadSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
+* `loadLanguage($lang_name = '')` - подключение языкового PHP-файла `$lang_name` из поддиректории `languages` текущего плагина (по умолчанию `$lang_name = $context['user']['language']`)
+* `loadTemplate($template_name)` - подключение PHP-файла шаблона `$template_name` из поддиректории `templates` текущего плагина
+* `loadJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
+* `loadCSS($css_name)` - подключение CSS-файла `$css_name` из поддиректории `styles` текущего плагина
+* `getUrl()` - возвращает URL-путь к директории текущего плагина
 
 ## Примеры рабочих плагинов
 

@@ -107,12 +107,12 @@ return class extends Plugin
 
 	public function loadTheme(): void
 	{
-		loadPluginLanguage();
+		$this->loadLanguage();
 
 		// Your code
 
 		// Use language strings
-		// $txt['example_plugin']['key']
+		// var_dump($this->txt['key'])
 	}
 
 	public function menuButtons($buttons): void
@@ -125,16 +125,28 @@ return class extends Plugin
 
 As you can see, all the hooks required by the plugin are listed in the `hooks` method, which is executed if the plugin is enabled.
 
-## Auxiliary functions
+## Example plugin language file
 
-The following functions are provided to work with plugin files:
+```php
+<?php
 
-* `loadPluginSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
-* `loadPluginLanguage($lang = '')` - plugging PHP language file `$lang` from subdirectory `languages` of the current plugin (by default `$lang = $context['user']['language']`)
-* `loadPluginTemplate($template_name)` - plugging PHP template file `$template_name` from subdirectory `templates` of the current plugin
-* `loadPluginJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
-* `loadPluginCSS($css_name)` - plugging CSS file `$css_name` from subdirectory `styles` of the current plugin
-* `getPluginUrl()` - returns URL to the directory of the current plugin
+return [
+	'key1' => 'Text 1',
+	'key2' => 'Text 2',
+];
+
+```
+
+## Auxiliary methods
+
+The following methods are provided to work within plugin classes:
+
+* `loadSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
+* `loadLanguage($lang_name)` - plugging PHP language file `$lang_name` from subdirectory `languages` of the current plugin (by default `$lang_name = $context['user']['language']`)
+* `loadTemplate($template_name)` - plugging PHP template file `$template_name` from subdirectory `templates` of the current plugin
+* `loadJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
+* `loadCSS($css_name)` - plugging CSS file `$css_name` from subdirectory `styles` of the current plugin
+* `getUrl()` - returns URL to the directory of the current plugin
 
 ## Examples of working plugins
 

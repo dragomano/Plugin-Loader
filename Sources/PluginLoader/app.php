@@ -20,7 +20,6 @@ global $boarddir, $boardurl, $plugins;
 defined('PLUGINS_DIR') || define('PLUGINS_DIR', $boarddir . '/Plugins');
 defined('PLUGINS_URL') || define('PLUGINS_URL', $boardurl . '/Plugins');
 
-require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/Integration.php';
 require_once __DIR__ . '/Plugin.php';
 
@@ -29,7 +28,7 @@ $loader->hooks();
 
 $enabled_plugins = empty($plugins) ? [] : explode(',', $plugins);
 
-if (empty($enabled_plugins))
+if (empty($enabled_plugins) || SMF === 'BACKGROUND')
 	return;
 
 foreach ($enabled_plugins as $plugin)
@@ -37,9 +36,8 @@ foreach ($enabled_plugins as $plugin)
 	$file = PLUGINS_DIR . '/' . $plugin . '/sources/plugin.php';
 	if (is_file($file))
 	{
-		$class = require_once $file;
-
-		if ($class instanceof Bugo\PluginLoader\Plugin)
-			$class->hooks();
+		$plugin_instance = require_once $file;
+		if ($plugin_instance instanceof Bugo\PluginLoader\Plugin)
+			$plugin_instance->hooks();
 	}
 }
