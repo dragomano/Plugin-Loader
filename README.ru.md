@@ -99,6 +99,11 @@ if (!defined('SMF'))
 
 return class extends Plugin
 {
+	public function getName(): string
+	{
+		return 'example';
+	}
+
 	public function hooks(): void
 	{
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
@@ -107,12 +112,23 @@ return class extends Plugin
 
 	public function loadTheme(): void
 	{
-		$this->loadLanguage();
+		// Ваш код
 
-		// Your code
-
-		// Use language strings
+		// Используем языковые строчки
+		// $this->loadLanguage();
 		// var_dump($this->txt['key'])
+
+		// Используем шаблон
+		// $this->loadTemplate('Example'); // будет загружен /templates/Example.template.php
+
+		// Используем другой source-файл того же плагина
+		// $this->loadSource('other); // будет загружен /sources/other.php
+
+		// Используем CSS-файл
+		// $this->loadCSS('test'); // будет загружен /styles/test.css
+
+		// Используем JS-файл
+		// $this->loadJS('test'); // будет загружен /scripts/test.js
 	}
 
 	public function menuButtons($buttons): void
@@ -141,12 +157,12 @@ return [
 
 Для работы внутри классов плагинов предусмотрены следующие методы:
 
-* `loadSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
 * `loadLanguage($lang_name = '')` - подключение языкового PHP-файла `$lang_name` из поддиректории `languages` текущего плагина (по умолчанию `$lang_name = $context['user']['language']`)
 * `loadTemplate($template_name)` - подключение PHP-файла шаблона `$template_name` из поддиректории `templates` текущего плагина
-* `loadJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
 * `loadCSS($css_name)` - подключение CSS-файла `$css_name` из поддиректории `styles` текущего плагина
-* `getUrl()` - возвращает URL-путь к директории текущего плагина
+* `loadJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
+* `loadSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
+* `getUrl($sub_directory = '')` - возвращает URL-путь к директории текущего плагина, включая `$sub_directory` (если указана)
 
 ## Примеры рабочих плагинов
 

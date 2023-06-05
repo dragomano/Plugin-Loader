@@ -99,6 +99,11 @@ if (!defined('SMF'))
 
 return class extends Plugin
 {
+	public function getName(): string
+	{
+		return 'example';
+	}
+
 	public function hooks(): void
 	{
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
@@ -107,12 +112,23 @@ return class extends Plugin
 
 	public function loadTheme(): void
 	{
-		$this->loadLanguage();
-
 		// Your code
 
 		// Use language strings
+		// $this->loadLanguage();
 		// var_dump($this->txt['key'])
+
+		// Use template
+		// $this->loadTemplate('Example'); // will be loaded /templates/Example.template.php
+
+		// Use other source file of the same plugin
+		// $this->loadSource('other); // will be loaded /sources/other.php
+
+		// Use CSS file
+		// $this->loadCSS('test'); // will be loaded /styles/test.css
+
+		// Use JS file
+		// $this->loadJS('test'); // will be loaded /scripts/test.js
 	}
 
 	public function menuButtons($buttons): void
@@ -141,12 +157,12 @@ return [
 
 The following methods are provided to work within plugin classes:
 
-* `loadSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
 * `loadLanguage($lang_name)` - plugging PHP language file `$lang_name` from subdirectory `languages` of the current plugin (by default `$lang_name = $context['user']['language']`)
 * `loadTemplate($template_name)` - plugging PHP template file `$template_name` from subdirectory `templates` of the current plugin
-* `loadJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
 * `loadCSS($css_name)` - plugging CSS file `$css_name` from subdirectory `styles` of the current plugin
-* `getUrl()` - returns URL to the directory of the current plugin
+* `loadJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
+* `loadSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
+* `getUrl($sub_directory = '')` - returns URL to the directory of the current plugin, including `$sub_directory` (if specified)
 
 ## Examples of working plugins
 
