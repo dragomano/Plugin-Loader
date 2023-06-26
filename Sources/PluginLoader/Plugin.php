@@ -35,15 +35,16 @@ abstract class Plugin
 
 	abstract public function hooks();
 
-	public function loadLanguage($lang = '')
+	protected function loadLanguage(string $lang_name = '')
 	{
 		global $user_info;
 
-		$lang = empty($lang) ? $user_info['language'] : $lang;
+		$lang = empty($lang_name) ? $user_info['language'] : $lang_name;
 		$languages = array_unique(['english', $lang]);
 
 		$pluginLanguages = [];
-		foreach ($languages as $language) {
+		foreach ($languages as $language)
+		{
 			$langFile = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/languages/' . $language . '.php';
 			$pluginLanguages[$language] = is_file($langFile) ? require_once $langFile : [];
 		}
@@ -52,16 +53,16 @@ abstract class Plugin
 			$this->txt = array_merge($pluginLanguages['english'], $pluginLanguages[$lang]);
 	}
 
-	public function loadTemplate($template_name)
+	protected function loadTemplate(string $template_name)
 	{
 		require_once PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/templates/' . $template_name . '.template.php';
 	}
 
-	public function loadCSS($css_name)
+	protected function loadCSS(string $css_name, string $extension = '.css')
 	{
 		global $settings;
 
-		$css_name .= '.css';
+		$css_name = str_replace($extension, '', $css_name) . $extension;
 
 		$source_file = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/styles/' . $css_name;
 		$target_file = $settings['default_theme_dir'] . '/css/' . $this->name . '_' . $css_name;
@@ -76,11 +77,11 @@ abstract class Plugin
 		loadCSSFile($this->name . '_' . $css_name);
 	}
 
-	public function loadJS($js_name)
+	protected function loadJS(string $js_name, string $extension = '.js')
 	{
 		global $settings;
 
-		$js_name .= '.js';
+		$js_name = str_replace($extension, '', $js_name) . $extension;
 
 		$source_file = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/scripts/' . $js_name;
 		$target_file = $settings['default_theme_dir'] . '/scripts/' . $this->name . '_' . $js_name;
@@ -95,12 +96,12 @@ abstract class Plugin
 		loadJavaScriptFile($this->name . '_' . $js_name, ['minimize' => true]);
 	}
 
-	public function loadSource($source_name)
+	protected function loadSource(string $source_name)
 	{
 		require_once PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/sources/' . $source_name . '.php';
 	}
 
-	public function getUrl(string $sub_directory = ''): string
+	protected function getUrl(string $sub_directory = ''): string
 	{
 		return PLUGINS_URL . '/' . $this->name . '/' . ($sub_directory ? $sub_directory . '/' : '');
 	}
