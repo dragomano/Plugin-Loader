@@ -1,4 +1,5 @@
 # Plugin Loader
+
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
@@ -11,22 +12,22 @@
 
 Плагины — это автономные модификации, которым не требуется установка или удаление через Менеджер пакетов. Они не вносят изменения в файлы SMF и работают полностью на хуках.
 
-Ключевым source-файлом у плагина является __plugin.php__ с анонимным классом внутри и методом __hooks__, выполняемым через хук *integrate_pre_load*. Также в директории каждого плагина должен находиться файл __plugin-info.xml__, содержащий ключевые данные плагина:
+Ключевым source-файлом у плагина является **plugin.php** с анонимным классом внутри и методом **hooks**, выполняемым через хук _integrate_pre_load_. Также в директории каждого плагина должен находиться файл **plugin-info.xml**, содержащий ключевые данные плагина:
 
-	* название
-	* описание
-	* версия плагина
-	* имя автора
-	* ссылка на сайт автора (не обязательно)
-	* имейл автора (не обязательно)
-	* используемая лицензия
-	* ссылка на сайт плагина
+    * название
+    * описание
+    * версия плагина
+    * имя автора
+    * ссылка на сайт автора (не обязательно)
+    * имейл автора (не обязательно)
+    * используемая лицензия
+    * ссылка на сайт плагина
 
-Плагины включатся и выключаются одним нажатием кнопки. Для установки достаточно поместить папку плагина с правильной структурой в директорию __Plugins__.
+Плагины включаются и выключаются одним нажатием кнопки. Для установки достаточно поместить папку плагина с правильной структурой в директорию **Plugins**.
 
 ![](preview.png)
 
-Список текущих активных плагинов форума хранится в глобальной переменной __$plugins__ в файле _Settings.php_. Для отключения проблемного плагина достаточно _удалить его название из переменной $plugins_, либо _переименовать папку плагина_, либо _переименовать файл plugin.php_ плагина.
+Список текущих активных плагинов форума хранится в глобальной переменной **$plugins** в файле _Settings.php_. Для отключения проблемного плагина достаточно _удалить его название из переменной $plugins_, либо _переименовать папку плагина_, либо _переименовать файл plugin.php_ плагина.
 
 ## Пример структуры плагина
 
@@ -70,10 +71,16 @@ example_plugin/
 	<author email="noreply@site.com" url="https://author-site.com">Author</author>
 	<license url="https://license-site.com">License name</license>
 	<website>https://plugin-site.com</website>
+	<settings>
+		<setting name="key1" type="text" default="" />
+		<setting name="key2" type="large_text" default="" />
+		<setting name="key3" type="check" default="1" />
+		<setting name="key4" type="int" default="1" />
+	</settings>
 </plugin>
 ```
 
-Плагины, требующие для своей работы создание таблиц в базе данных, должны содержать узел `<database>имя_файла.php</database>` в __plugin-info.xml__. В указанном файле можно разместить скрипт создания нужных таблиц при включении плагина, если они ещё не созданы.
+Плагины, требующие для своей работы создание таблиц в базе данных, должны содержать узел `<database>имя_файла.php</database>` в **plugin-info.xml**. В указанном файле можно разместить скрипт создания нужных таблиц при включении плагина, если они ещё не созданы.
 
 ## Пример файла plugin.php
 
@@ -129,6 +136,9 @@ return class extends Plugin
 
 		// Используем JS-файл
 		// $this->loadJS('test'); // будет загружен /scripts/test.js
+
+		// Используем настройки плагина
+		// var_dump($this->getSettings());
 	}
 
 	public function menuButtons($buttons): void
@@ -157,14 +167,15 @@ return [
 
 Для работы внутри классов плагинов предусмотрены следующие методы:
 
-* `loadLanguage($lang_name = '')` - подключение языкового PHP-файла `$lang_name` из поддиректории `languages` текущего плагина (по умолчанию `$lang_name = $context['user']['language']`)
-* `loadTemplate($template_name)` - подключение PHP-файла шаблона `$template_name` из поддиректории `templates` текущего плагина
-* `loadCSS($css_name)` - подключение CSS-файла `$css_name` из поддиректории `styles` текущего плагина
-* `loadJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
-* `loadSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
-* `getUrl($sub_directory = '')` - возвращает URL-путь к директории текущего плагина, включая `$sub_directory` (если указана)
+- `loadLanguage($lang_name = '')` - подключение языкового PHP-файла `$lang_name` из поддиректории `languages` текущего плагина (по умолчанию `$lang_name = $context['user']['language']`)
+- `loadTemplate($template_name)` - подключение PHP-файла шаблона `$template_name` из поддиректории `templates` текущего плагина
+- `loadCSS($css_name)` - подключение CSS-файла `$css_name` из поддиректории `styles` текущего плагина
+- `loadJS($js_name)` - подключение JS-файла `$js_name` из поддиректории `scripts` текущего плагина
+- `loadSource($source_name)` - подключение PHP-файла `$source_name` из поддиректории `sources` текущего плагина
+- `getUrl($sub_directory = '')` - возвращает URL-путь к директории текущего плагина, включая `$sub_directory` (если указана)
 
 ## Примеры рабочих плагинов
 
-* [Profile Starsigns](https://drive.proton.me/urls/8ZX5G1QXSR#WG0Yl99C0NJw)
-* [Font Awesome](https://drive.proton.me/urls/ABF7BBDC80#Eo0cVWRbrbxi)
+- [Profile Starsigns](https://drive.proton.me/urls/8ZX5G1QXSR#WG0Yl99C0NJw)
+- [Font Awesome](https://drive.proton.me/urls/ABF7BBDC80#Eo0cVWRbrbxi)
+- [Yandex Metrica](https://drive.proton.me/urls/16ZEE2PCKW#UI0yxQoG7BKP)
