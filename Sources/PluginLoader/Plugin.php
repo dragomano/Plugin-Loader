@@ -9,7 +9,7 @@
  * @copyright 2023 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  *
- * @version 0.4
+ * @version 0.5
  */
 
 namespace Bugo\PluginLoader;
