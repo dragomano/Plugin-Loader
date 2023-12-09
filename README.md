@@ -1,4 +1,5 @@
 # Plugin Loader
+
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
@@ -11,22 +12,22 @@ This concept mod is inspired by the Wedge plugin system. It adds plugin support 
 
 Plugins are standalone modifications that do not need to be installed or removed through the Package Manager. They don't make changes to SMF files and run entirely on hooks.
 
-The key source file of the plugin is __plugin.php__ with the anonymous class and the __hooks__ method, which is executed through the *integrate_pre_load* hook. Also in the directory of each plugin should be a file __plugin-info.xml__, which contains the key data of the plugin:
+The key source file of the plugin is **plugin.php** with the anonymous class and the **hooks** method, which is executed through the _integrate_pre_load_ hook. Also in the directory of each plugin should be a file **plugin-info.xml**, which contains the key data of the plugin:
 
-	* name
-	* description
-	* plugin version
-	* author name
-	* link to the author's website (optional)
-	* email of the author (optional)
-	* the license used
-	* link to the plugin site
+    * name
+    * description
+    * plugin version
+    * author name
+    * link to the author's website (optional)
+    * email of the author (optional)
+    * the license used
+    * link to the plugin site
 
-Plugins are turned on and off at the touch of a button. To install, simply place the plugin folder with the correct structure in the __Plugins__ directory.
+Plugins are turned on and off at the touch of a button. To install, simply place the plugin folder with the correct structure in the **Plugins** directory.
 
 ![](preview.png)
 
-The list of currently active plugins is stored in the global variable __$plugins__ in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the plugin.php_ file of the plugin.
+The list of currently active plugins is stored in the global variable **$plugins** in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the plugin.php_ file of the plugin.
 
 ## Example plugin structure
 
@@ -70,10 +71,16 @@ example_plugin/
 	<author email="noreply@site.com" url="https://author-site.com">Author</author>
 	<license url="https://license-site.com">License name</license>
 	<website>https://plugin-site.com</website>
+	<settings>
+		<setting name="key1" type="text" default="" />
+		<setting name="key2" type="large_text" default="" />
+		<setting name="key3" type="check" default="1" />
+		<setting name="key4" type="int" default="1" />
+	</settings>
 </plugin>
 ```
 
-Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in __plugin-info.xml__. In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
+Plugins that require creation of tables in the database for their work must contain a node `<database>file_name.php</database>` in **plugin-info.xml**. In the specified file, you can place a script to create the necessary tables when the plugin is enabled, if they have not yet been created.
 
 ## Example plugin.php file
 
@@ -129,6 +136,9 @@ return class extends Plugin
 
 		// Use JS file
 		// $this->loadJS('test'); // will be loaded /scripts/test.js
+
+		// Use plugin settings
+		// var_dump($this->getSettings());
 	}
 
 	public function menuButtons($buttons): void
@@ -157,14 +167,15 @@ return [
 
 The following methods are provided to work within plugin classes:
 
-* `loadLanguage($lang_name)` - plugging PHP language file `$lang_name` from subdirectory `languages` of the current plugin (by default `$lang_name = $context['user']['language']`)
-* `loadTemplate($template_name)` - plugging PHP template file `$template_name` from subdirectory `templates` of the current plugin
-* `loadCSS($css_name)` - plugging CSS file `$css_name` from subdirectory `styles` of the current plugin
-* `loadJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
-* `loadSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
-* `getUrl($sub_directory = '')` - returns URL to the directory of the current plugin, including `$sub_directory` (if specified)
+- `loadLanguage($lang_name)` - plugging PHP language file `$lang_name` from subdirectory `languages` of the current plugin (by default `$lang_name = $context['user']['language']`)
+- `loadTemplate($template_name)` - plugging PHP template file `$template_name` from subdirectory `templates` of the current plugin
+- `loadCSS($css_name)` - plugging CSS file `$css_name` from subdirectory `styles` of the current plugin
+- `loadJS($js_name)` - plugging JS-file `$js_name` from subdirectory `scripts` of the current plugin
+- `loadSource($source_name)` - plugging PHP file `$source_name` from subdirectory `sources` of the current plugin
+- `getUrl($sub_directory = '')` - returns URL to the directory of the current plugin, including `$sub_directory` (if specified)
 
 ## Examples of working plugins
 
-* [Profile Starsigns](https://drive.proton.me/urls/8ZX5G1QXSR#WG0Yl99C0NJw)
-* [Font Awesome](https://drive.proton.me/urls/ABF7BBDC80#Eo0cVWRbrbxi)
+- [Profile Starsigns](https://drive.proton.me/urls/8ZX5G1QXSR#WG0Yl99C0NJw)
+- [Font Awesome](https://drive.proton.me/urls/ABF7BBDC80#Eo0cVWRbrbxi)
+- [Yandex Metrica](https://drive.proton.me/urls/16ZEE2PCKW#UI0yxQoG7BKP)
