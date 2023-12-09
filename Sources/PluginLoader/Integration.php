@@ -25,13 +25,13 @@ if (!defined('SMF'))
  */
 class Integration
 {
-	public function hooks()
+	public function hooks(): void
 	{
 		add_integration_function('integrate_update_settings_file', __CLASS__ . '::updateSettingsFile#', false, __FILE__);
 		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas#', false, __FILE__);
 	}
 
-	public function updateSettingsFile(array &$settings_defs)
+	public function updateSettingsFile(array &$settings_defs): void
 	{
 		$settings_defs['plugins'] = [
 			'text' => implode("\n", [
@@ -46,7 +46,7 @@ class Integration
 		];
 	}
 
-	public function adminAreas(array &$admin_areas)
+	public function adminAreas(array &$admin_areas): void
 	{
 		global $txt;
 
@@ -64,7 +64,7 @@ class Integration
 		];
 	}
 
-	public function main()
+	public function main(): void
 	{
 		global $context, $txt, $sourcedir;
 
@@ -92,65 +92,30 @@ class Integration
 		call_helper($subActions[$context['sub_action']]);
 	}
 
-	public function browseList()
+	public function browseList(): void
 	{
-		global $context, $txt, $sourcedir;
+		global $context, $txt;
 
 		$context['page_title'] = $txt['pl_title'];
 
+		$this->preparePluginList();
+
 		loadCSSFile('plugin_loader.css');
+
 		loadJavaScriptFile('plugin_loader.js', ['minimize' => true]);
 
 		loadTemplate('PluginLoader');
 
 		$context['sub_template'] = 'main';
 
-		$this->preparePluginList();
+		$this->handleSave();
 
-		if (isset($_REQUEST['toggle']) || isset($_REQUEST['remove']))
-		{
-			$input = file_get_contents('php://input');
-			$data  = smf_json_decode($input, true) ?? [];
+		$this->handleToggle();
 
-			if (empty($data) || empty($data['plugin']))
-				redirectexit('action=admin;area=plugins');
-
-			if (isset($data['status']))
-			{
-				if ($data['status'] === 'on')
-				{
-					$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
-						return $item !== $data['plugin'];
-					});
-				}
-				else
-				{
-					if (!empty($context['pl_plugins'][$data['plugin']]['database']))
-					{
-						db_extend('packages');
-
-						require PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin'] . DIRECTORY_SEPARATOR . $context['pl_plugins'][$data['plugin']]['database'];
-					}
-
-					$context['pl_enabled_plugins'][] = $data['plugin'];
-				}
-
-				sort($context['pl_enabled_plugins']);
-
-				require_once $sourcedir . '/Subs-Admin.php';
-
-				updateSettingsFile(['plugins' => implode(',', $context['pl_enabled_plugins'])]);
-
-				return;
-			}
-
-			require_once $sourcedir . '/Subs-Package.php';
-
-			deltree(PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin']);
-		}
+		$this->handleRemove();
 	}
 
-	public function uploadArea()
+	public function uploadArea(): void
 	{
 		global $context, $txt;
 
@@ -169,45 +134,184 @@ class Integration
 		$context['sub_template'] = 'upload';
 	}
 
-	private function preparePluginList()
+	private function preparePluginList(): void
 	{
 		global $context, $plugins;
 
-		$context['pl_enabled_plugins'] = empty($plugins) ? [] : explode(',', $plugins);
 		$context['pl_plugins'] = [];
+
+		$context['pl_enabled_plugins'] = empty($plugins) ? [] : explode(',', $plugins);
 
 		$plugins = glob(PLUGINS_DIR . '/**/plugin-info.xml', GLOB_BRACE);
 
-		foreach ($plugins as $plugin)
-		{
-			if (is_file($plugin))
-			{
+		foreach ($plugins as $plugin) {
+			if (is_file($plugin)) {
 				$id = basename(dirname($plugin));
 				$content = file_get_contents($plugin);
 
-				if (empty($content))
-				{
+				if (empty($content)) {
 					$context['pl_plugins'][$id] = false;
 					continue;
 				}
 
 				$content = preg_replace('~\s*<(!DOCTYPE|xsl)[^>]+?>\s*~i', '', $content);
 				$xmldata = simplexml_load_string($content);
+
 				$context['pl_plugins'][$id] = $this->escapeArray($this->xmlToArray($xmldata));
+				$this->prepareSettings($id);
 			}
 		}
+	}
+
+	private function handleSave(): void
+	{
+		global $context;
+
+		if (!isset($_REQUEST['save']) || empty($_REQUEST['plugin_name']))
+			return;
+
+		checkSession();
+
+		$plugin_name = $_REQUEST['plugin_name'];
+		$plugin_options = [];
+
+		foreach ($context['pl_plugins'][$plugin_name]['settings'] as $var => $data) {
+			if (isset($_REQUEST[$var])) {
+				if ($data['type'] === 'check') {
+					$plugin_options[$var] = (bool) $_REQUEST[$var];
+				} elseif ($data['type'] ==='int') {
+					$plugin_options[$var] = (int) $_REQUEST[$var];
+				} else {
+					$plugin_options[$var] = (string) $_REQUEST[$var];
+				}
+			}
+		}
+
+		$this->saveSettings($plugin_name, $plugin_options);
+	}
+
+	private function handleToggle(): void
+	{
+		global $context, $sourcedir;
+
+		if (!isset($_REQUEST['toggle']))
+			return;
+
+		$input = file_get_contents('php://input');
+		$data  = smf_json_decode($input, true) ?? [];
+
+		if (empty($data) || empty($data['status']) || empty($data['plugin']))
+			redirectexit('action=admin;area=plugins');
+
+		if ($data['status'] === 'on') {
+			$context['pl_enabled_plugins'] = array_filter($context['pl_enabled_plugins'], function ($item) use ($data) {
+				return $item !== $data['plugin'];
+			});
+		} else {
+			if (!empty($context['pl_plugins'][$data['plugin']]['database'])) {
+				db_extend('packages');
+
+				require PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin'] . DIRECTORY_SEPARATOR . $context['pl_plugins'][$data['plugin']]['database'];
+			}
+
+			$context['pl_enabled_plugins'][] = $data['plugin'];
+		}
+
+		sort($context['pl_enabled_plugins']);
+
+		require_once $sourcedir . '/Subs-Admin.php';
+
+		updateSettingsFile(['plugins' => implode(',', $context['pl_enabled_plugins'])]);
+	}
+
+	private function handleRemove(): void
+	{
+		global $sourcedir;
+
+		if (!isset($_REQUEST['remove']))
+			return;
+
+		$input = file_get_contents('php://input');
+		$data  = smf_json_decode($input, true) ?? [];
+
+		if (empty($data) || empty($data['plugin']))
+			redirectexit('action=admin;area=plugins');
+
+		require_once $sourcedir . '/Subs-Package.php';
+
+		deltree(PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin']);
+	}
+
+	private function prepareSettings(string $id): void
+	{
+		global $context, $txt;
+
+		if (!empty($context['pl_plugins'][$id]['settings'])) {
+			$settings  = $this->getSettings(PLUGINS_DIR . DIRECTORY_SEPARATOR . $id);
+			$languages = $this->getLanguages($id);
+
+			$options = [];
+			if (isset($context['pl_plugins'][$id]['settings']['setting']['@attributes'])) {
+				$option = $context['pl_plugins'][$id]['settings']['setting']['@attributes'];
+				$options[$option['name']] = [
+					'name'  => $languages[$option['name']] ?? $txt['not_applicable'],
+					'type'  => $option['type'],
+					'value' => $settings[$option['name']] ?? $option['default'],
+				];
+			} else {
+				foreach ($context['pl_plugins'][$id]['settings']['setting'] as $setting) {
+					$option = $setting['@attributes'];
+					$options[$option['name']] = [
+						'name'  => $languages[$option['name']] ?? $txt['not_applicable'],
+						'type'  => $option['type'],
+						'value' => $settings[$option['name']] ?? $option['default'],
+					];
+				}
+			}
+
+			$context['pl_plugins'][$id]['settings'] = $options;
+		}
+	}
+
+	private function getSettings(string $path): array
+	{
+		return is_file($path . '/settings.ini') ? parse_ini_file($path . '/settings.ini') : [];
+	}
+
+	private function saveSettings(string $plugin, array $settings): void
+	{
+		if (empty($settings)) return;
+
+		$iniString = '';
+		foreach ($settings as $key => $value) {
+			if (in_array(gettype($value), ['boolean', 'integer']))
+				$iniString .= "$key = $value\n";
+			else
+				$iniString .= "$key = \"$value\"\n";
+		}
+
+		file_put_contents(PLUGINS_DIR . DIRECTORY_SEPARATOR . $plugin . '/settings.ini', $iniString);
+	}
+
+	private function getLanguages(string $id): array
+	{
+		global $context;
+
+		$path = PLUGINS_DIR . DIRECTORY_SEPARATOR . $id . '/languages/';
+
+		$langFile = is_file($path . $context['user']['language'] . '.php') ? $path . $context['user']['language'] . '.php' : 'english.php';
+
+		return require_once $langFile;
 	}
 
 	private function escapeArray(array $data): array
 	{
 		global $smcFunc;
 
-		foreach ($data as $key => $value)
-		{
-			if (is_array($value))
-				$data[$key] = $this->escapeArray($value);
-			else
-				$data[$key] = $smcFunc['htmlspecialchars']($value, ENT_QUOTES);
+		foreach ($data as $key => $value) {
+			$data[$key] = is_array($value)
+				? $this->escapeArray($value)
+				: $smcFunc['htmlspecialchars']($value, ENT_QUOTES);
 		}
 
 		return $data;
@@ -219,14 +323,12 @@ class Integration
 			$nodes = $xml->children();
 			$attributes = $xml->attributes();
 
-			if (0 !== count($attributes))
-			{
+			if (0 !== count($attributes)) {
 				foreach ($attributes as $attrName => $attrValue)
 					$collection['@attributes'][$attrName] = strval($attrValue);
 			}
 
-			if (0 === $nodes->count())
-			{
+			if (0 === $nodes->count()) {
 				if ($xml->attributes())
 					$collection['value'] = strval($xml);
 				else
@@ -235,10 +337,8 @@ class Integration
 				return $collection;
 			}
 
-			foreach ($nodes as $nodeName => $nodeValue)
-			{
-				if (count($nodeValue->xpath('../' . $nodeName)) < 2)
-				{
+			foreach ($nodes as $nodeName => $nodeValue) {
+				if (count($nodeValue->xpath('../' . $nodeName)) < 2) {
 					$collection[$nodeName] = $parser($nodeValue);
 					continue;
 				}
@@ -261,8 +361,7 @@ class Integration
 
 		$package = $_FILES['package'];
 
-		if ($package['error'] !== UPLOAD_ERR_OK)
-		{
+		if ($package['error'] !== UPLOAD_ERR_OK) {
 			$errorMessages = [
 				UPLOAD_ERR_PARTIAL    => sprintf($txt['pl_upload_error_partial'], $package['name']),
 				UPLOAD_ERR_INI_SIZE   => sprintf($txt['pl_upload_error_ini_size'], $package['name']),
@@ -278,8 +377,7 @@ class Integration
 			return false;
 		}
 
-		switch ($package['type'])
-		{
+		switch ($package['type']) {
 			case 'application/zip':
 			case 'application/x-zip':
 			case 'application/x-zip-compressed':
@@ -293,8 +391,7 @@ class Integration
 		$zip = new ZipArchive();
 		$result = $zip->open($package['tmp_name']);
 
-		if ($result === true)
-		{
+		if ($result === true) {
 			$plugin = pathinfo($package['name'], PATHINFO_FILENAME);
 
 			if ($zip->locateName($plugin . '/plugin-info.xml') !== false)
@@ -303,9 +400,7 @@ class Integration
 				return $zip->extractTo(PLUGINS_DIR . DIRECTORY_SEPARATOR . $plugin);
 
 			$context['upload_error'] = $txt['pl_upload_wrong_file'];
-		}
-		else
-		{
+		} else {
 			$context['upload_error'] = sprintf($txt['pl_upload_failed'], $result);
 		}
 

@@ -11,10 +11,8 @@ function template_main()
 	<div class="information">', sprintf($txt['pl_info'], PLUGINS_DIR), '</div>
 	<div class="plugins">';
 
-	foreach ($context['pl_plugins'] as $id => $plugin)
-	{
-		if (empty($plugin))
-		{
+	foreach ($context['pl_plugins'] as $id => $plugin) {
+		if (empty($plugin)) {
 			echo '
 		<div class="noticebox">', sprintf($txt['pl_loading_error'], $id), '</div>';
 
@@ -34,7 +32,58 @@ function template_main()
 				</h4>
 			</div>
 			<div class="floatleft">
-				<div>', $plugin['description'][$context['user']['language']] ?? $plugin['description']['english'], '</div>
+				<div>', $plugin['description'][$context['user']['language']] ?? $plugin['description']['english'], '</div>';
+
+		if (!empty($plugin['settings'])) {
+			echo '
+				<br class="clear">
+				<div class="title_bar"><h5 class="titlebg">', $txt['settings'], '</h5></div>
+				<form id="', $id, '_form_', $context['session_id'], '" class="noticebox settings" accept-charset="', $context['character_set'], '" method="post">
+					<input type="hidden" name="plugin_name" value="', $id, '">
+					<input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '">';
+
+			foreach ($plugin['settings'] as $conf_id => $setting) {
+				if (empty($setting['type']))
+					continue;
+
+				echo '
+					<div class="windowbg">';
+
+				if ($setting['type'] === 'text') {
+					echo '
+						<label for="', $conf_id, '">', $setting['name'], '</label>
+						<input id="', $conf_id, '" name="', $conf_id, '" type="text" value="', $setting['value'], '">';
+				}
+
+				if ($setting['type'] === 'large_text') {
+					echo '
+						<label for="', $conf_id, '">', $setting['name'], '</label><br>
+						<textarea id="', $conf_id, '" name="', $conf_id, '">', $setting['value'], '</textarea>';
+				}
+
+				if ($setting['type'] === 'check') {
+					echo '
+						<label for="', $conf_id, '">', $setting['name'], '</label>
+						<input id="', $conf_id, '" name="', $conf_id, '" type="checkbox"', $setting['value'] ? ' checked' : '', '>';
+				}
+
+				if ($setting['type'] === 'int') {
+					echo '
+						<label for="', $conf_id, '">', $setting['name'], '</label>
+						<input id="', $conf_id, '" name="', $conf_id, '" type="number" value="', $setting['value'], '">';
+				}
+
+				echo '
+					</div>';
+			}
+
+			echo '
+					<button form="', $id, '_form_', $context['session_id'], '" class="button plugin_save" type="submit">', $txt['save'], '</button>
+					<br class="clear">
+				</form>';
+		}
+
+		echo '
 				<div class="smalltext">
 					<span class="author_info">
 						', $txt['author'], ': ',
@@ -54,11 +103,17 @@ function template_main()
 
 	<script>
 		const plugin = new PluginLoader();
+
 		const toggleButtons = document.querySelectorAll(".plugin_toggle");
 		toggleButtons.forEach(function (button) {
 			button.addEventListener("click", (e) => plugin.toggle(e));
 			const removeButton = button.nextElementSibling;
 			removeButton.addEventListener("click", (e) => plugin.remove(e));
+		});
+
+		const saveButtons = document.querySelectorAll(".plugin_save");
+		saveButtons.forEach(function (button) {
+			button.addEventListener("click", (e) => plugin.save(e));
 		});
 	</script>';
 }

@@ -35,7 +35,7 @@ abstract class Plugin
 
 	abstract public function hooks();
 
-	protected function loadLanguage(string $lang_name = '')
+	protected function loadLanguage(string $lang_name = ''): void
 	{
 		global $user_info;
 
@@ -43,9 +43,8 @@ abstract class Plugin
 		$languages = array_unique(['english', $lang]);
 
 		$pluginLanguages = [];
-		foreach ($languages as $language)
-		{
-			$langFile = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/languages/' . $language . '.php';
+		foreach ($languages as $language) {
+			$langFile = $this->getPath() . '/languages/' . $language . '.php';
 			$pluginLanguages[$language] = is_file($langFile) ? require_once $langFile : [];
 		}
 
@@ -53,22 +52,21 @@ abstract class Plugin
 			$this->txt = array_merge($pluginLanguages['english'], $pluginLanguages[$lang]);
 	}
 
-	protected function loadTemplate(string $template_name)
+	protected function loadTemplate(string $template_name): void
 	{
-		require_once PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/templates/' . $template_name . '.template.php';
+		require_once $this->getPath() . '/templates/' . $template_name . '.template.php';
 	}
 
-	protected function loadCSS(string $css_name, string $extension = '.css')
+	protected function loadCSS(string $css_name, string $extension = '.css'): void
 	{
 		global $settings;
 
 		$css_name = str_replace($extension, '', $css_name) . $extension;
 
-		$source_file = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/styles/' . $css_name;
+		$source_file = $this->getPath() . '/styles/' . $css_name;
 		$target_file = $settings['default_theme_dir'] . '/css/' . $this->name . '_' . $css_name;
 
-		if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file))
-		{
+		if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file)) {
 			$css = new CSS;
 			$css->add($source_file);
 			$css->minify($target_file);
@@ -77,17 +75,16 @@ abstract class Plugin
 		loadCSSFile($this->name . '_' . $css_name);
 	}
 
-	protected function loadJS(string $js_name, string $extension = '.js')
+	protected function loadJS(string $js_name, string $extension = '.js'): void
 	{
 		global $settings;
 
 		$js_name = str_replace($extension, '', $js_name) . $extension;
 
-		$source_file = PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/scripts/' . $js_name;
+		$source_file = $this->getPath() . '/scripts/' . $js_name;
 		$target_file = $settings['default_theme_dir'] . '/scripts/' . $this->name . '_' . $js_name;
 
-		if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file))
-		{
+		if (!is_file($target_file) || filemtime($target_file) < filemtime($source_file)) {
 			$js = new JS;
 			$js->add($source_file);
 			$js->minify($target_file);
@@ -96,13 +93,29 @@ abstract class Plugin
 		loadJavaScriptFile($this->name . '_' . $js_name, ['minimize' => true]);
 	}
 
-	protected function loadSource(string $source_name)
+	protected function loadSource(string $source_name): void
 	{
-		require_once PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name . '/sources/' . $source_name . '.php';
+		require_once $this->getPath() . '/sources/' . $source_name . '.php';
 	}
 
 	protected function getUrl(string $sub_directory = ''): string
 	{
 		return PLUGINS_URL . '/' . $this->name . '/' . ($sub_directory ? $sub_directory . '/' : '');
+	}
+
+	protected function getPath(): string
+	{
+		return PLUGINS_DIR . DIRECTORY_SEPARATOR . $this->name;
+	}
+
+	protected function getSettings(string $key, $default = null)
+	{
+		$settings = parse_ini_file($this->getPath() . '/settings.ini');
+
+		if (empty($key)) {
+			return $settings;
+		}
+
+		return $settings[$key] ?? $default;
 	}
 }

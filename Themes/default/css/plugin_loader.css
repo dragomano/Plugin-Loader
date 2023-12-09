@@ -26,6 +26,19 @@
 	border-top: 1px solid gray;
 }
 
+.plugins div.floatleft .settings label {
+	font-weight: bold;
+	margin: 1em;
+}
+
+.plugins div.floatleft .settings input[type=number] {
+	width: 20%;
+}
+
+.plugins div.floatleft .settings textarea {
+	width: 100%;
+}
+
 .plugins div.floatright {
 	margin-top: 1em;
 }
