@@ -3,7 +3,7 @@
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
-![PHP](https://img.shields.io/badge/PHP-^7.0-blue.svg?style=flat)
+![PHP](https://img.shields.io/badge/PHP-^8.0-blue.svg?style=flat)
 [![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
 
 [Описание на русском](README.ru.md)
@@ -12,7 +12,7 @@ This concept mod is inspired by the Wedge plugin system. It adds plugin support 
 
 Plugins are standalone modifications that do not need to be installed or removed through the Package Manager. They don't make changes to SMF files and run entirely on hooks.
 
-The key source file of the plugin is **plugin.php** with the anonymous class and the **hooks** method, which is executed through the _integrate_pre_load_ hook. Also in the directory of each plugin should be a file **plugin-info.xml**, which contains the key data of the plugin:
+The entry point of each plugin is **plugin.php** with an anonymous class inside. Also in the directory of each plugin should be a file **plugin-info.xml**, which contains the key data of the plugin:
 
     * name
     * description
@@ -93,7 +93,7 @@ Plugins that require creation of tables in the database for their work must cont
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
- * @copyright 2023 Author
+ * @copyright 2024 Author
  * @license https://opensource.org/licenses/MIT The MIT License
  *
  * @version 0.1
@@ -106,17 +106,9 @@ if (!defined('SMF'))
 
 return class extends Plugin
 {
-	public function getName(): string
-	{
-		return 'example';
-	}
+	public const NAME = 'example';
 
-	public function hooks(): void
-	{
-		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', __CLASS__ . '::menuButtons#', false, __FILE__);
-	}
-
+	#[Hook('integrate_load_theme', self::class . '::loadTheme#', __FILE__)]
 	public function loadTheme(): void
 	{
 		// Your code
@@ -141,6 +133,7 @@ return class extends Plugin
 		// var_dump($this->getSettings());
 	}
 
+	#[Hook('integrate_menu_buttons', self::class . '::menuButtons#', __FILE__)]
 	public function menuButtons($buttons): void
 	{
 		// var_dump($buttons);
@@ -149,7 +142,7 @@ return class extends Plugin
 
 ```
 
-As you can see, all the hooks required by the plugin are listed in the `hooks` method, which is executed if the plugin is enabled.
+As you can see, all hooks required by the plugin are defined using the `Hook` attribute.
 
 ## Example plugin language file
 

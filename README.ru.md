@@ -3,7 +3,7 @@
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
-![PHP](https://img.shields.io/badge/PHP-^7.0-blue.svg?style=flat)
+![PHP](https://img.shields.io/badge/PHP-^8.0-blue.svg?style=flat)
 [![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
 
 [Description in English](README.md)
@@ -12,7 +12,7 @@
 
 Плагины — это автономные модификации, которым не требуется установка или удаление через Менеджер пакетов. Они не вносят изменения в файлы SMF и работают полностью на хуках.
 
-Ключевым source-файлом у плагина является **plugin.php** с анонимным классом внутри и методом **hooks**, выполняемым через хук _integrate_pre_load_. Также в директории каждого плагина должен находиться файл **plugin-info.xml**, содержащий ключевые данные плагина:
+Точкой входа каждого плагина является **plugin.php** с анонимным классом внутри. Также в директории каждого плагина должен находиться файл **plugin-info.xml**, содержащий ключевые данные плагина:
 
     * название
     * описание
@@ -93,30 +93,23 @@ example_plugin/
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
- * @copyright 2023 Author
+ * @copyright 2024 Author
  * @license https://opensource.org/licenses/MIT The MIT License
  *
  * @version 0.1
  */
 
+use Bugo\PluginLoader\Hook;
 use Bugo\PluginLoader\Plugin;
 
-if (!defined('SMF'))
+if (! defined('SMF'))
 	die('No direct access...');
 
 return class extends Plugin
 {
-	public function getName(): string
-	{
-		return 'example';
-	}
+	public const NAME = 'example';
 
-	public function hooks(): void
-	{
-		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
-		add_integration_function('integrate_menu_buttons', __CLASS__ . '::menuButtons#', false, __FILE__);
-	}
-
+	#[Hook('integrate_load_theme', self::class . '::loadTheme#', __FILE__)]
 	public function loadTheme(): void
 	{
 		// Ваш код
@@ -141,6 +134,7 @@ return class extends Plugin
 		// var_dump($this->getSettings());
 	}
 
+	#[Hook('integrate_menu_buttons', self::class . '::menuButtons#', __FILE__)]
 	public function menuButtons($buttons): void
 	{
 		// var_dump($buttons);
@@ -149,7 +143,7 @@ return class extends Plugin
 
 ```
 
-Как видите, все требуемые плагином хуки перечисляются в методе `hooks`, который выполняется только при включении плагина.
+Как видите, все требуемые плагином хуки определяются с помощью атрибута `Hook`.
 
 ## Пример языкового файла плагина
 
