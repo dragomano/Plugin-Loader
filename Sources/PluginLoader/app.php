@@ -1,15 +1,11 @@
 <?php
 
 /**
- * app.php
- *
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
  * @copyright 2023-2024 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
- *
- * @version 0.6
  */
 
 if (! defined('SMF'))
@@ -40,8 +36,8 @@ function pl_autoloader($classname)
 
 spl_autoload_register('pl_autoloader');
 
-$loader = new Bugo\PluginLoader\Integration();
-$loader();
+$init = new Bugo\PluginLoader\Integration();
+$init();
 
 $enabled_plugins = empty($plugins) ? [] : explode(',', $plugins);
 

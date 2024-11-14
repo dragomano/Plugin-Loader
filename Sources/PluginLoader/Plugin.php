@@ -1,15 +1,11 @@
 <?php
 
 /**
- * Plugin.php
- *
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
  * @copyright 2023-2024 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
- *
- * @version 0.6
  */
 
 namespace Bugo\PluginLoader;
@@ -26,13 +22,26 @@ abstract class Plugin
 
 	protected const NAME = '';
 
-	protected array $txt;
+	protected array $context;
+
+	protected ?array $user_info;
+
+	protected ?array $memberContext;
+
+	protected array $settings;
+
+	protected ?array $txt;
+
+	public function __construct()
+	{
+		foreach (['context', 'user_info', 'memberContext', 'settings', 'txt'] as $f) {
+			$this->{$f} = &$GLOBALS[$f];
+		}
+	}
 
 	protected function loadLanguage(string $lang_name = ''): void
 	{
-		global $user_info;
-
-		$lang = empty($lang_name) ? $user_info['language'] : $lang_name;
+		$lang = empty($lang_name) ? $this->user_info['language'] : $lang_name;
 		$languages = array_unique(['english', $lang]);
 
 		$pluginLanguages = [];
@@ -42,7 +51,7 @@ abstract class Plugin
 		}
 
 		if (is_array($pluginLanguages['english'])) {
-			$this->txt = array_merge($pluginLanguages['english'], $pluginLanguages[$lang]);
+			$this->txt = array_merge($this->txt, $pluginLanguages['english'], $pluginLanguages[$lang]);
 		}
 	}
 
@@ -53,12 +62,10 @@ abstract class Plugin
 
 	protected function loadCSS(string $css_name, string $extension = '.css'): void
 	{
-		global $settings;
-
 		$css_name = str_replace($extension, '', $css_name) . $extension;
 
 		$source_file = $this->getPath() . '/styles/' . $css_name;
-		$target_file = $settings['default_theme_dir'] . '/css/' . static::NAME . '_' . $css_name;
+		$target_file = $this->settings['default_theme_dir'] . '/css/' . static::NAME . '_' . $css_name;
 
 		if (! is_file($target_file) || filemtime($target_file) < filemtime($source_file)) {
 			$css = new CSS;
@@ -71,12 +78,10 @@ abstract class Plugin
 
 	protected function loadJS(string $js_name, string $extension = '.js'): void
 	{
-		global $settings;
-
 		$js_name = str_replace($extension, '', $js_name) . $extension;
 
 		$source_file = $this->getPath() . '/scripts/' . $js_name;
-		$target_file = $settings['default_theme_dir'] . '/scripts/' . static::NAME . '_' . $js_name;
+		$target_file = $this->settings['default_theme_dir'] . '/scripts/' . static::NAME . '_' . $js_name;
 
 		if (! is_file($target_file) || filemtime($target_file) < filemtime($source_file)) {
 			$js = new JS;
