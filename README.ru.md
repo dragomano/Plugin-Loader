@@ -88,15 +88,11 @@ example_plugin/
 <?php
 
 /**
- * plugin.php
- *
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
  * @copyright 2024 Author
  * @license https://opensource.org/licenses/MIT The MIT License
- *
- * @version 0.1
  */
 
 use Bugo\PluginLoader\Hook;
