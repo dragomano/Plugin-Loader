@@ -91,10 +91,11 @@ Plugins that require creation of tables in the database for their work must cont
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
- * @copyright 2024 Author
+ * @copyright 2025 Author
  * @license https://opensource.org/licenses/MIT The MIT License
  */
 
+use Bugo\PluginLoader\Attributes\Hook;
 use Bugo\PluginLoader\Plugin;
 
 if (!defined('SMF'))
@@ -104,7 +105,7 @@ return class extends Plugin
 {
 	public const NAME = 'example';
 
-	#[Hook('integrate_load_theme', self::class . '::loadTheme#', __FILE__)]
+	#[Hook('integrate_load_theme')]
 	public function loadTheme(): void
 	{
 		// Your code
@@ -129,7 +130,7 @@ return class extends Plugin
 		// var_dump($this->getSettings());
 	}
 
-	#[Hook('integrate_menu_buttons', self::class . '::menuButtons#', __FILE__)]
+	#[Hook('integrate_menu_buttons')]
 	public function menuButtons($buttons): void
 	{
 		// var_dump($buttons);
