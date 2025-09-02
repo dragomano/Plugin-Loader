@@ -4,7 +4,7 @@
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2024 Bugo
+ * @copyright 2023-2025 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
@@ -26,12 +26,12 @@ function pl_autoloader($classname)
 		return false;
 
 	$classname = str_replace('\\', '/', str_replace('Bugo\PluginLoader\\', '', $classname));
-	$file_path = __DIR__ . DIRECTORY_SEPARATOR . $classname . '.php';
+	$path = __DIR__ . DIRECTORY_SEPARATOR . $classname . '.php';
 
-	if (! file_exists($file_path))
+	if (! file_exists($path))
 		return false;
 
-	require_once $file_path;
+	require_once $path;
 }
 
 spl_autoload_register('pl_autoloader');
@@ -39,19 +39,19 @@ spl_autoload_register('pl_autoloader');
 $init = new Bugo\PluginLoader\Integration();
 $init();
 
-$enabled_plugins = empty($plugins) ? [] : explode(',', $plugins);
+$enabledPlugins = empty($plugins) ? [] : explode(',', $plugins);
 
-if ($enabled_plugins === [] || SMF === 'BACKGROUND')
+if ($enabledPlugins === [] || SMF === 'BACKGROUND')
 	return;
 
-foreach ($enabled_plugins as $plugin) {
+foreach ($enabledPlugins as $plugin) {
 	$file = PLUGINS_DIR . '/' . $plugin . '/sources/plugin.php';
 
 	if (is_file($file)) {
-		$plugin_instance = require_once $file;
+		$pluginInstance = require_once $file;
 
-		if ($plugin_instance instanceof Bugo\PluginLoader\Plugin) {
-			$plugin_instance();
+		if ($pluginInstance instanceof Bugo\PluginLoader\Plugin) {
+			$pluginInstance();
 		}
 	}
 }

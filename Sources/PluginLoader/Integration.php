@@ -1,17 +1,38 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php
 
 /**
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2024 Bugo
+ * @copyright 2023-2025 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
 namespace Bugo\PluginLoader;
 
+use Bugo\PluginLoader\Attributes\Hook;
 use SimpleXMLElement;
 use ZipArchive;
+
+use function array_filter;
+use function basename;
+use function count;
+use function explode;
+use function file_get_contents;
+use function file_put_contents;
+use function gettype;
+use function glob;
+use function implode;
+use function in_array;
+use function ini_get;
+use function is_array;
+use function is_file;
+use function parse_ini_file;
+use function preg_replace;
+use function simplexml_load_string;
+use function sort;
+use function sprintf;
+use function strval;
 
 if (! defined('SMF'))
 	die('No direct access...');
@@ -42,7 +63,7 @@ final class Integration
 		}
 	}
 
-	#[Hook('integrate_update_settings_file', self::class . '::updateSettingsFile#', __FILE__)]
+	#[Hook('integrate_update_settings_file')]
 	public function updateSettingsFile(array &$settings_defs): void
 	{
 		$settings_defs['plugins'] = [
@@ -58,7 +79,7 @@ final class Integration
 		];
 	}
 
-	#[Hook('integrate_admin_areas', self::class . '::adminAreas#', __FILE__)]
+	#[Hook('integrate_admin_areas')]
 	public function adminAreas(array &$admin_areas): void
 	{
 		loadLanguage('PluginLoader/');

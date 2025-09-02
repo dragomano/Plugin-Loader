@@ -4,7 +4,7 @@
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2024 Bugo
+ * @copyright 2023-2025 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
@@ -12,6 +12,14 @@ namespace Bugo\PluginLoader;
 
 use MatthiasMullie\Minify\CSS;
 use MatthiasMullie\Minify\JS;
+
+use function array_merge;
+use function array_unique;
+use function filemtime;
+use function is_array;
+use function is_file;
+use function parse_ini_file;
+use function str_replace;
 
 if (! defined('SMF'))
 	die('No direct access...');
