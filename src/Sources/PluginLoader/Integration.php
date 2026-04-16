@@ -268,6 +268,14 @@ final class Integration
 			redirectexit('action=admin;area=plugins');
 		}
 
+		$enabledPlugins = isset($this->context['pl_enabled_plugins']) && is_array($this->context['pl_enabled_plugins'])
+			? $this->context['pl_enabled_plugins']
+			: (empty($this->plugins) ? [] : explode(',', $this->plugins));
+
+		if (in_array($data['plugin'], $enabledPlugins, true)) {
+			redirectexit('action=admin;area=plugins');
+		}
+
 		require_once $this->sourcedir . '/Subs-Package.php';
 
 		deltree(PLUGINS_DIR . DIRECTORY_SEPARATOR . $data['plugin']);

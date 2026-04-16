@@ -175,6 +175,28 @@ INI,
 	}
 
 	#[Test]
+	public function handleRemoveForbidsDeletingEnabledPlugin(): void
+	{
+		TestEnvironment::reset([], ['plugins' => 'demo']);
+
+		$_REQUEST = ['remove' => 1];
+
+		$GLOBALS['smf_json_decode_override'] = ['plugin' => 'demo'];
+
+		$integration = new Integration();
+
+		try {
+			$this->invokePrivate($integration, 'handleRemove');
+
+			Assert::fail('Expected redirect exception was not thrown.');
+		} catch (RuntimeException $exception) {
+			Assert::same($exception->getMessage(), 'redirect:action=admin;area=plugins');
+		}
+
+		Assert::same(SmfTestState::all('deltree'), []);
+	}
+
+	#[Test]
 	public function templateMainPassesSessionDataToJavascriptActions(): void
 	{
 		TestEnvironment::reset();

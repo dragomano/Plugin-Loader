@@ -48,6 +48,10 @@ function checkSession(string $type = 'post', string $from = 'admin', bool $isFat
 
 function smf_json_decode(string $json, bool $associative = false): mixed
 {
+	if (array_key_exists('smf_json_decode_override', $GLOBALS)) {
+		return $GLOBALS['smf_json_decode_override'];
+	}
+
 	return json_decode($json, $associative);
 }
 

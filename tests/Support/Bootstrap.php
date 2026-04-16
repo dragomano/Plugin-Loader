@@ -108,6 +108,8 @@ final class TestEnvironment
 		$GLOBALS['boarddir']  = self::rootDir();
 		$GLOBALS['boardurl']  = 'https://example.test';
 
+		unset($GLOBALS['smf_json_decode_override']);
+
 		foreach ($globalOverrides as $name => $value) {
 			$GLOBALS[$name] = $value;
 		}
