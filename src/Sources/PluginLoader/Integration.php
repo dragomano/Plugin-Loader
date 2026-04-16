@@ -192,7 +192,7 @@ final class Integration
 		if (! isset($_REQUEST['save']) || empty($_REQUEST['plugin_name']))
 			return;
 
-		checkSession();
+		checkSession('request');
 
 		$plugin_name    = $_REQUEST['plugin_name'];
 		$plugin_options = [];
@@ -216,6 +216,8 @@ final class Integration
 	{
 		if (! isset($_REQUEST['toggle']))
 			return;
+
+		checkSession('request');
 
 		$input = file_get_contents('php://input');
 		$data  = smf_json_decode($input, true) ?? [];
@@ -258,6 +260,8 @@ final class Integration
 	{
 		if (! isset($_REQUEST['remove']))
 			return;
+
+		checkSession('request');
 
 		$input = file_get_contents('php://input');
 		$data  = smf_json_decode($input, true) ?? [];

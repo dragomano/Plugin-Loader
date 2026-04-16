@@ -34,7 +34,7 @@ function template_main()
 			<div class="floatleft">
 				<div>', $plugin['description'][$context['user']['language']] ?? $plugin['description']['english'], '</div>';
 
-		if (!empty($plugin['settings'])) {
+		if (! empty($plugin['settings'])) {
 			echo '
 				<br class="clear">
 				<div class="title_bar"><h5 class="titlebg">', $txt['settings'], '</h5></div>
@@ -102,7 +102,7 @@ function template_main()
 	</div>
 
 	<script>
-		const plugin = new PluginLoader();
+		const plugin = new PluginLoader("', $context['session_var'], '", "', $context['session_id'], '");
 
 		const toggleButtons = document.querySelectorAll(".plugin_toggle");
 		toggleButtons.forEach(function (button) {
@@ -122,11 +122,11 @@ function template_upload()
 {
 	global $context, $txt, $scripturl;
 
-	if (!empty($context['upload_error']))
+	if (! empty($context['upload_error']))
 		echo '
 	<div class="errorbox">', $context['upload_error'], '</div>';
 
-	if (!empty($context['upload_success']))
+	if (! empty($context['upload_success']))
 		echo '
 	<div class="infobox">', $context['upload_success'], '</div>';
 

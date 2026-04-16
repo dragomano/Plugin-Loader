@@ -37,9 +37,13 @@ function loadTemplate(string $name): void
 	SmfTestState::record('loadTemplate', $name);
 }
 
-function checkSession(): void
+function checkSession(string $type = 'post', string $from = 'admin', bool $isFatal = true): void
 {
-	SmfTestState::record('checkSession', true);
+	SmfTestState::record('checkSession', [
+		'type'    => $type,
+		'from'    => $from,
+		'isFatal' => $isFatal,
+	]);
 }
 
 function smf_json_decode(string $json, bool $associative = false): mixed

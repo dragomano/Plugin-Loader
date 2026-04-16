@@ -1,6 +1,7 @@
 class PluginLoader {
-  constructor() {
+  constructor(sessionVar, sessionId) {
     this.workUrl = smf_scripturl + '?action=admin;area=plugins';
+    this.sessionParam = ';' + encodeURIComponent(sessionVar) + '=' + encodeURIComponent(sessionId);
   }
 
   async save(e) {
@@ -26,7 +27,7 @@ class PluginLoader {
     const status = target.dataset.status;
     const removeButton = target.nextElementSibling;
 
-    const response = await fetch(this.workUrl + ';toggle', {
+    const response = await fetch(this.workUrl + ';toggle' + this.sessionParam, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
@@ -61,7 +62,7 @@ class PluginLoader {
 
     if (!plugin) return false;
 
-    const response = await fetch(this.workUrl + ';remove', {
+    const response = await fetch(this.workUrl + ';remove' + this.sessionParam, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8',

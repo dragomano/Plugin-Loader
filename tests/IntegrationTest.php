@@ -9,6 +9,7 @@ require_once __DIR__ . '/Support/SmfNamespaceStubs.php';
 
 use Bugo\PluginLoader\Integration;
 use ReflectionMethod;
+use RuntimeException;
 use Testo\Assert;
 use Testo\Test;
 use Tests\Support\SmfTestState;
@@ -123,6 +124,97 @@ INI,
 		$contents = file_get_contents(PLUGINS_DIR . '/demo/settings.ini');
 
 		Assert::same($contents, "enabled = 1\nlimit = 3\ntitle = \"Demo plugin\"\n");
+	}
+
+	#[Test]
+	public function handleToggleValidatesSessionBeforeReadingPayload(): void
+	{
+		TestEnvironment::reset();
+
+		$_REQUEST = ['toggle' => 1];
+
+		$integration = new Integration();
+
+		try {
+			$this->invokePrivate($integration, 'handleToggle');
+
+			Assert::fail('Expected redirect exception was not thrown.');
+		} catch (RuntimeException $exception) {
+			Assert::same($exception->getMessage(), 'redirect:action=admin;area=plugins');
+		}
+
+		Assert::same(SmfTestState::last('checkSession'), [
+			'type'    => 'request',
+			'from'    => 'admin',
+			'isFatal' => true,
+		]);
+	}
+
+	#[Test]
+	public function handleRemoveValidatesSessionBeforeReadingPayload(): void
+	{
+		TestEnvironment::reset();
+
+		$_REQUEST = ['remove' => 1];
+
+		$integration = new Integration();
+
+		try {
+			$this->invokePrivate($integration, 'handleRemove');
+
+			Assert::fail('Expected redirect exception was not thrown.');
+		} catch (RuntimeException $exception) {
+			Assert::same($exception->getMessage(), 'redirect:action=admin;area=plugins');
+		}
+
+		Assert::same(SmfTestState::last('checkSession'), [
+			'type'    => 'request',
+			'from'    => 'admin',
+			'isFatal' => true,
+		]);
+	}
+
+	#[Test]
+	public function templateMainPassesSessionDataToJavascriptActions(): void
+	{
+		TestEnvironment::reset();
+		$GLOBALS['context']['pl_plugins'] = [
+			'demo' => [
+				'name'    => 'Demo Plugin',
+				'website' => '',
+				'version' => '1.0.0',
+				'license' => [
+					'value'       => 'BSD-3-Clause',
+					'@attributes' => ['url' => ''],
+				],
+				'author' => [
+					'value'       => 'Author',
+					'@attributes' => ['url' => ''],
+				],
+				'description' => [
+					'english' => 'Demo description',
+				],
+				'settings' => [],
+			],
+		];
+
+		$GLOBALS['context']['pl_enabled_plugins']  = [];
+		$GLOBALS['settings']['default_images_url'] = 'https://example.test/images';
+
+		$GLOBALS['txt']['pl_info'] = 'Info %s';
+		$GLOBALS['txt']['remove']  = 'Remove';
+		$GLOBALS['txt']['author']  = 'Author';
+
+		require_once dirname(__DIR__) . '/src/Themes/default/PluginLoader.template.php';
+
+		ob_start();
+		template_main();
+		$output = ob_get_clean();
+
+		Assert::true(str_contains(
+			$output,
+			'const plugin = new PluginLoader("session_var", "session-id");'
+		));
 	}
 
 	private function invokePrivate(object $object, string $method, mixed ...$arguments): mixed
