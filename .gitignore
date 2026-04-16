@@ -1,6 +1,13 @@
 **/.idea/
 **/.vscode/
 **/vendor/
-Themes/default/languages/PluginLoader/*
-!Themes/default/languages/PluginLoader/index.php
-!Themes/default/languages/PluginLoader/.english.php
+src/Themes/default/languages/PluginLoader/*
+!src/Themes/default/languages/PluginLoader/index.php
+!src/Themes/default/languages/PluginLoader/.english.php
+
+coverage/
+
+clover.xml
+cobertura.xml
+
+composer.lock
