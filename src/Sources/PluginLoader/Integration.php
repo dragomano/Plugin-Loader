@@ -50,7 +50,7 @@ final class Integration
 
 	private array $smcFunc;
 
-	private ?array $txt;
+	private ?array $txt = null;
 
 	private string $plugins;
 
@@ -86,7 +86,7 @@ final class Integration
 
 		$admin_areas['forum']['areas']['plugins'] = [
 			'label'       => $this->txt['pl_title'],
-			'function'    => [$this, 'main'],
+			'function'    => $this->main(...),
 			'permission'  => ['admin_forum'],
 			'icon'        => 'modifications',
 			'subsections' => [
@@ -99,8 +99,8 @@ final class Integration
 	public function main(): void
 	{
 		$subActions = [
-			'browse' => [$this, 'browseList'],
-			'upload' => [$this, 'uploadArea'],
+			'browse' => $this->browseList(...),
+			'upload' => $this->uploadArea(...),
 		];
 
 		$this->context[$this->context['admin_menu_name']]['tab_data'] = [
@@ -178,7 +178,7 @@ final class Integration
 				}
 
 				$content = preg_replace('~\s*<(!DOCTYPE|xsl)[^>]+?>\s*~i', '', $content);
-				$xmldata = simplexml_load_string($content);
+				$xmldata = simplexml_load_string((string) $content);
 
 				$this->context['pl_plugins'][$id] = $this->escapeArray($this->xmlToArray($xmldata));
 
@@ -229,9 +229,7 @@ final class Integration
 		if ($data['status'] === 'on') {
 			$this->context['pl_enabled_plugins'] = array_filter(
 				$this->context['pl_enabled_plugins'],
-				function ($item) use ($data) {
-					return $item !== $data['plugin'];
-				}
+				fn($item) => $item !== $data['plugin']
 			);
 		} else {
 			if (! empty($this->context['pl_plugins'][$data['plugin']]['database'])) {
@@ -430,7 +428,7 @@ final class Integration
 		$result = $zip->open($package['tmp_name']);
 
 		if ($result === true) {
-			$plugin = pathinfo($package['name'], PATHINFO_FILENAME);
+			$plugin = pathinfo((string) $package['name'], PATHINFO_FILENAME);
 
 			if ($zip->locateName($plugin . '/plugin-info.xml') !== false) {
 				return $zip->extractTo(PLUGINS_DIR);

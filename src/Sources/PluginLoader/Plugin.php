@@ -32,13 +32,13 @@ abstract class Plugin
 
 	protected array $context;
 
-	protected ?array $user_info;
+	protected ?array $user_info = null;
 
-	protected ?array $memberContext;
+	protected ?array $memberContext = null;
 
 	protected array $settings;
 
-	protected ?array $txt;
+	protected ?array $txt = null;
 
 	public function __construct()
 	{
