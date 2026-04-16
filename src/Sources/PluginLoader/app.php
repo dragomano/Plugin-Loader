@@ -4,7 +4,7 @@
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2025 Bugo
+ * @copyright 2023-2026 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
@@ -22,14 +22,16 @@ defined('PLUGINS_URL') || define('PLUGINS_URL', $boardurl . '/Plugins');
  */
 function pl_autoloader($classname)
 {
-	if (! str_contains($classname, 'Bugo\PluginLoader'))
+	if (! str_contains($classname, 'Bugo\PluginLoader')) {
 		return false;
+	}
 
 	$classname = str_replace('\\', '/', str_replace('Bugo\PluginLoader\\', '', $classname));
-	$path = __DIR__ . DIRECTORY_SEPARATOR . $classname . '.php';
+	$path      = __DIR__ . DIRECTORY_SEPARATOR . $classname . '.php';
 
-	if (! file_exists($path))
+	if (! file_exists($path)) {
 		return false;
+	}
 
 	require_once $path;
 }

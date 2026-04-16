@@ -4,7 +4,7 @@
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2025 Bugo
+ * @copyright 2023-2026 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
@@ -49,12 +49,13 @@ abstract class Plugin
 
 	protected function loadLanguage(string $lang_name = ''): void
 	{
-		$lang = empty($lang_name) ? $this->user_info['language'] : $lang_name;
+		$lang      = empty($lang_name) ? $this->user_info['language'] : $lang_name;
 		$languages = array_unique(['english', $lang]);
 
 		$pluginLanguages = [];
 		foreach ($languages as $language) {
 			$langFile = $this->getPath() . '/languages/' . $language . '.php';
+
 			$pluginLanguages[$language] = is_file($langFile) ? require_once $langFile : [];
 		}
 
@@ -117,7 +118,8 @@ abstract class Plugin
 
 	protected function getSettings(string $key = '', $default = null)
 	{
-		$settings = parse_ini_file($this->getPath() . '/settings.ini');
+		$settingsFile = $this->getPath() . '/settings.ini';
+		$settings     = is_file($settingsFile) ? parse_ini_file($settingsFile) : [];
 
 		if ($key === '') {
 			return $settings;

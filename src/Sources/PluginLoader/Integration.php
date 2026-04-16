@@ -4,7 +4,7 @@
  * @package Plugin Loader
  * @link https://github.com/dragomano/Plugin-Loader
  * @author Bugo <bugo@dragomano.ru>
- * @copyright 2023-2025 Bugo
+ * @copyright 2023-2026 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause The 3-Clause BSD License
  */
 
@@ -67,15 +67,15 @@ final class Integration
 	public function updateSettingsFile(array &$settings_defs): void
 	{
 		$settings_defs['plugins'] = [
-			'text' => implode("\n", [
+			'type'    => 'string',
+			'default' => '',
+			'text'    => implode("\n", [
 				'/**',
 				' * Enabled plugins',
 				' *',
 				' * @var string',
 				' */',
 			]),
-			'default' => '',
-			'type' => 'string'
 		];
 	}
 
@@ -105,7 +105,7 @@ final class Integration
 
 		$this->context[$this->context['admin_menu_name']]['tab_data'] = [
 			'title' => $this->txt['pl_title'],
-			'tabs' => [
+			'tabs'  => [
 				'browse' => [
 					'description' => $this->txt['pl_browse_desc'],
 				],
@@ -168,11 +168,12 @@ final class Integration
 
 		foreach ($plugins as $plugin) {
 			if (is_file($plugin)) {
-				$id = basename(dirname($plugin));
+				$id      = basename(dirname($plugin));
 				$content = file_get_contents($plugin);
 
 				if (empty($content)) {
 					$this->context['pl_plugins'][$id] = false;
+
 					continue;
 				}
 
@@ -180,6 +181,7 @@ final class Integration
 				$xmldata = simplexml_load_string($content);
 
 				$this->context['pl_plugins'][$id] = $this->escapeArray($this->xmlToArray($xmldata));
+
 				$this->prepareSettings($id);
 			}
 		}
@@ -192,7 +194,7 @@ final class Integration
 
 		checkSession();
 
-		$plugin_name = $_REQUEST['plugin_name'];
+		$plugin_name    = $_REQUEST['plugin_name'];
 		$plugin_options = [];
 
 		foreach ($this->context['pl_plugins'][$plugin_name]['settings'] as $var => $data) {
@@ -280,6 +282,7 @@ final class Integration
 		$options = [];
 		if (isset($this->context['pl_plugins'][$id]['settings']['setting']['@attributes'])) {
 			$option = $this->context['pl_plugins'][$id]['settings']['setting']['@attributes'];
+
 			$options[$option['name']] = [
 				'name'  => $languages[$option['name']] ?? $this->txt['not_applicable'],
 				'type'  => $option['type'],
@@ -288,6 +291,7 @@ final class Integration
 		} else {
 			foreach ($this->context['pl_plugins'][$id]['settings']['setting'] as $setting) {
 				$option = $setting['@attributes'];
+
 				$options[$option['name']] = [
 					'name'  => $languages[$option['name']] ?? $this->txt['not_applicable'],
 					'type'  => $option['type'],
@@ -327,7 +331,7 @@ final class Integration
 
 		$langFile = is_file($path . $this->context['user']['language'] . '.php')
 			? $path . $this->context['user']['language'] . '.php'
-			: 'english.php';
+			: $path . 'english.php';
 
 		return require_once $langFile;
 	}
@@ -346,7 +350,7 @@ final class Integration
 	private function xmlToArray(SimpleXMLElement $xml): array
 	{
 		$parser = function (SimpleXMLElement $xml, array $collection = []) use (&$parser) {
-			$nodes = $xml->children();
+			$nodes      = $xml->children();
 			$attributes = $xml->attributes();
 
 			if (0 !== count($attributes)) {
@@ -368,6 +372,7 @@ final class Integration
 			foreach ($nodes as $nodeName => $nodeValue) {
 				if (count($nodeValue->xpath('../' . $nodeName)) < 2) {
 					$collection[$nodeName] = $parser($nodeValue);
+
 					continue;
 				}
 
@@ -382,8 +387,9 @@ final class Integration
 
 	private function extractPackage(): bool
 	{
-		if (! isset($_REQUEST['get']))
+		if (! isset($_REQUEST['get'])) {
 			return false;
+		}
 
 		$package = $_FILES['package'];
 
@@ -416,7 +422,7 @@ final class Integration
 				return false;
 		}
 
-		$zip = new ZipArchive();
+		$zip    = new ZipArchive();
 		$result = $zip->open($package['tmp_name']);
 
 		if ($result === true) {
