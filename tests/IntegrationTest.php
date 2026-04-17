@@ -108,6 +108,43 @@ INI,
 	}
 
 	#[Test]
+	public function preparePluginListSkipsPluginWithInvalidXml(): void
+	{
+		TestEnvironment::reset();
+
+		TestEnvironment::createPlugin('broken', [
+			'plugin-info.xml' => <<<'XML'
+<?xml version="1.0"?>
+<plugin id="Author:Broken">
+	<name>Broken Plugin</name>
+	<description>Missing closing tags
+XML,
+		]);
+
+		TestEnvironment::createPlugin('working', [
+			'plugin-info.xml' => <<<'XML'
+<?xml version="1.0"?>
+<plugin id="Author:Working">
+	<name>Working Plugin</name>
+	<description>
+		<english>Working description</english>
+	</description>
+	<version>1.0.0</version>
+	<author>Author</author>
+	<license>BSD-3-Clause</license>
+</plugin>
+XML,
+		]);
+
+		$integration = new Integration();
+
+		$this->invokePrivate($integration, 'preparePluginList');
+
+		Assert::false(isset($GLOBALS['context']['pl_plugins']['broken']));
+		Assert::same($GLOBALS['context']['pl_plugins']['working']['name'], 'Working Plugin');
+	}
+
+	#[Test]
 	public function saveSettingsWritesIniWithExpectedFormatting(): void
 	{
 		TestEnvironment::reset();

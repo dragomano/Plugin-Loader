@@ -27,6 +27,9 @@ use function in_array;
 use function ini_get;
 use function is_array;
 use function is_file;
+use function libxml_clear_errors;
+use function libxml_get_errors;
+use function libxml_use_internal_errors;
 use function parse_ini_file;
 use function preg_replace;
 use function simplexml_load_string;
@@ -177,8 +180,17 @@ final class Integration
 					continue;
 				}
 
-				$content = preg_replace('~\s*<(!DOCTYPE|xsl)[^>]+?>\s*~i', '', $content);
-				$xmldata = simplexml_load_string((string) $content);
+				$content           = preg_replace('~\s*<(!DOCTYPE|xsl)[^>]+?>\s*~i', '', $content);
+				$useInternalErrors = libxml_use_internal_errors(true);
+				$xmldata           = simplexml_load_string((string) $content);
+				$xmlErrors         = libxml_get_errors();
+
+				libxml_clear_errors();
+				libxml_use_internal_errors($useInternalErrors);
+
+				if ($xmldata === false || $xmlErrors !== []) {
+					continue;
+				}
 
 				$this->context['pl_plugins'][$id] = $this->escapeArray($this->xmlToArray($xmldata));
 
