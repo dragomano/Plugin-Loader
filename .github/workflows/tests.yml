@@ -1,6 +1,6 @@
 name: PHP Tests
 
-on: [workflow_dispatch, push, pull_request]
+on: [ workflow_dispatch, push, pull_request ]
 
 jobs:
   test:
@@ -30,10 +30,9 @@ jobs:
           ls -la coverage
           test -f coverage/clover.xml
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v6
-        with:
-          fail_ci_if_error: true
-          files: ${{ github.workspace }}/coverage/clover.xml
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: dragomano/Plugin-Loader
+      - name: Upload coverage reports to Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          composer global require php-coveralls/php-coveralls
+          php-coveralls --coverage_clover=coverage/clover.xml -v
