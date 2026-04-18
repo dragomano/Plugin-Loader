@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Tests;
 
-require_once __DIR__ . '/Support/Bootstrap.php';
-
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

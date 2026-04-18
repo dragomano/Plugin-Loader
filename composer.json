@@ -5,6 +5,9 @@
     }
   },
   "autoload-dev": {
+    "files": [
+      "tests/Support/Bootstrap.php"
+    ],
     "psr-4": {
       "Tests\\": "tests"
     }

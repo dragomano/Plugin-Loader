@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
-require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 require_once __DIR__ . '/SmfTestState.php';
 require_once __DIR__ . '/TestEnvironment.php';
 require_once __DIR__ . '/SmfNamespaceStubs.php';
