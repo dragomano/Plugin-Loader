@@ -3,8 +3,9 @@
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
-![PHP](https://img.shields.io/badge/PHP-^8.0-blue.svg?style=flat)
+![PHP](https://img.shields.io/badge/PHP-^8.2-blue.svg?style=flat)
 [![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
+[![Coverage Status](https://coveralls.io/repos/github/dragomano/Plugin-Loader/badge.svg?branch=main)](https://coveralls.io/github/dragomano/Plugin-Loader?branch=main)
 
 [Description in English](README.md)
 
@@ -28,6 +29,13 @@
 ![](preview.png)
 
 Список текущих активных плагинов форума хранится в глобальной переменной **$plugins** в файле _Settings.php_. Для отключения проблемного плагина достаточно _удалить его название из переменной $plugins_, либо _переименовать папку плагина_, либо _переименовать файл plugin.php_ плагина.
+
+## Важные ограничения
+
+- Менеджер плагинов читает метаданные каждого плагина из файла **plugin-info.xml**. Если XML-файл пустой или повреждённый, такой плагин пропускается в списке и не будет включён, пока файл не исправят.
+- При включении плагина имя его директории добавляется в **$plugins** в _Settings.php_. Если в **plugin-info.xml** указан скрипт в узле `<database>`, он выполняется при включении плагина.
+- При выключении плагина имя его директории удаляется из **$plugins** в _Settings.php_. Файлы плагина на диске остаются, поэтому его можно включить снова позже.
+- При удалении плагина удаляется его директория из **Plugins**. Удалять можно только выключенные плагины; включённый плагин сначала нужно выключить.
 
 ## Пример структуры плагина
 
@@ -91,7 +99,7 @@ example_plugin/
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
- * @copyright 2025 Author
+ * @copyright 2026 Author
  * @license https://opensource.org/licenses/MIT The MIT License
  */
 

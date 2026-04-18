@@ -3,8 +3,9 @@
 [![SMF 2.1](https://img.shields.io/badge/SMF-2.1-ed6033.svg?style=flat)](https://github.com/SimpleMachines/SMF2.1)
 ![License](https://img.shields.io/github/license/dragomano/plugin-loader)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
-![PHP](https://img.shields.io/badge/PHP-^8.0-blue.svg?style=flat)
+![PHP](https://img.shields.io/badge/PHP-^8.2-blue.svg?style=flat)
 [![Crowdin](https://badges.crowdin.net/plugin-loader/localized.svg)](https://crowdin.com/project/plugin-loader)
+[![Coverage Status](https://coveralls.io/repos/github/dragomano/Plugin-Loader/badge.svg?branch=main)](https://coveralls.io/github/dragomano/Plugin-Loader?branch=main)
 
 [Описание на русском](README.ru.md)
 
@@ -28,6 +29,13 @@ Plugins are turned on and off at the touch of a button. To install, simply place
 ![](preview.png)
 
 The list of currently active plugins is stored in the global variable **$plugins** in the _Settings.php_ file. To disable a problem plugin, just _remove its name from the $plugins_ variable, or _rename the plugin folder_, or _rename the plugin.php_ file of the plugin.
+
+## Operational notes
+
+- The plugin manager reads metadata from each plugin's **plugin-info.xml** file. If the XML is empty or invalid, that plugin is skipped in the list and is not enabled automatically until the file is fixed.
+- Enabling a plugin adds its directory name to **$plugins** in _Settings.php_. If **plugin-info.xml** declares a `<database>` script, that script is executed when the plugin is enabled.
+- Disabling a plugin removes its directory name from **$plugins** in _Settings.php_. The plugin files stay on disk, so it can be enabled again later.
+- Removing a plugin deletes its directory from **Plugins**. Removal is allowed only for disabled plugins; enabled plugins must be disabled first.
 
 ## Example plugin structure
 
@@ -91,7 +99,7 @@ Plugins that require creation of tables in the database for their work must cont
  * @package Example
  * @link https://plugin-site.com
  * @author Author https://author-site.com
- * @copyright 2025 Author
+ * @copyright 2026 Author
  * @license https://opensource.org/licenses/MIT The MIT License
  */
 
