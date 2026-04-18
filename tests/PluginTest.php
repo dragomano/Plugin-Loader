@@ -7,6 +7,7 @@ namespace Tests;
 use Bugo\PluginLoader\Plugin;
 use Testo\Assert;
 use Testo\Test;
+use Tests\Support\SmfTestState;
 use Tests\Support\TestEnvironment;
 
 final class PluginTest
@@ -77,6 +78,87 @@ INI,
 
 		Assert::same($plugin->setting('title'), 'Demo plugin');
 	}
+
+	#[Test]
+	public function loadTemplateRequiresPluginTemplateFile(): void
+	{
+		TestEnvironment::reset();
+		TestEnvironment::createPlugin('plugin-test', [
+			'templates/demo.template.php' => <<<'PHP'
+<?php
+
+\Tests\Support\SmfTestState::record('templateRequire', 'demo');
+PHP,
+		]);
+
+		$plugin = new TestablePlugin();
+		$plugin->loadPluginTemplate('demo');
+
+		Assert::same(SmfTestState::last('templateRequire'), 'demo');
+	}
+
+	#[Test]
+	public function loadSourceRequiresPluginSourceFile(): void
+	{
+		TestEnvironment::reset();
+		TestEnvironment::createPlugin('plugin-test', [
+			'sources/demo.php' => <<<'PHP'
+<?php
+
+\Tests\Support\SmfTestState::record('sourceRequire', 'demo');
+PHP,
+		]);
+
+		$plugin = new TestablePlugin();
+		$plugin->loadPluginSource('demo');
+
+		Assert::same(SmfTestState::last('sourceRequire'), 'demo');
+	}
+
+	#[Test]
+	public function loadCSSMinifiesAndRegistersStylesheet(): void
+	{
+		TestEnvironment::reset();
+		TestEnvironment::createPlugin('plugin-test', [
+			'styles/demo.css' => 'body { color: red; }',
+		]);
+
+		$plugin = new TestablePlugin();
+		$plugin->loadPluginCss('demo');
+
+		Assert::true(is_file(TestEnvironment::themeDir() . '/css/plugin-test_demo.css'));
+		Assert::same(SmfTestState::last('loadCSSFile'), ['plugin-test_demo.css', []]);
+	}
+
+	#[Test]
+	public function loadJSMinifiesAndRegistersScript(): void
+	{
+		TestEnvironment::reset();
+		TestEnvironment::createPlugin('plugin-test', [
+			'scripts/demo.js' => 'const demo = 1;',
+		]);
+
+		$plugin = new TestablePlugin();
+		$plugin->loadPluginJs('demo');
+
+		Assert::true(is_file(TestEnvironment::themeDir() . '/scripts/plugin-test_demo.js'));
+		Assert::same(SmfTestState::last('loadJavaScriptFile'), [
+			'plugin-test_demo.js',
+			['minimize' => true],
+		]);
+	}
+
+	#[Test]
+	public function getUrlAndPathUsePluginConstants(): void
+	{
+		TestEnvironment::reset();
+
+		$plugin = new TestablePlugin();
+
+		Assert::same($plugin->pluginUrl(), 'https://example.test/Plugins/plugin-test/');
+		Assert::same($plugin->pluginUrl('assets'), 'https://example.test/Plugins/plugin-test/assets/');
+		Assert::same($plugin->pluginPath(), PLUGINS_DIR . DIRECTORY_SEPARATOR . 'plugin-test');
+	}
 }
 
 final class TestablePlugin extends Plugin
@@ -96,5 +178,35 @@ final class TestablePlugin extends Plugin
 	public function setting(string $key, mixed $default = null): mixed
 	{
 		return $this->getSettings($key, $default);
+	}
+
+	public function loadPluginTemplate(string $template): void
+	{
+		$this->loadTemplate($template);
+	}
+
+	public function loadPluginCss(string $name, string $extension = '.css'): void
+	{
+		$this->loadCSS($name, $extension);
+	}
+
+	public function loadPluginJs(string $name, string $extension = '.js'): void
+	{
+		$this->loadJS($name, $extension);
+	}
+
+	public function loadPluginSource(string $source): void
+	{
+		$this->loadSource($source);
+	}
+
+	public function pluginUrl(string $subDirectory = ''): string
+	{
+		return $this->getUrl($subDirectory);
+	}
+
+	public function pluginPath(): string
+	{
+		return $this->getPath();
 	}
 }

@@ -41,9 +41,13 @@ final class TestEnvironment
 			'admin'           => [],
 		], $contextOverrides);
 
-		$GLOBALS['user_info']     = ['language' => $GLOBALS['context']['user']['language']];
+		$GLOBALS['user_info'] = [
+			'language' => $GLOBALS['context']['user']['language'],
+		];
+
 		$GLOBALS['memberContext'] = [];
-		$GLOBALS['settings']      = ['default_theme_dir' => self::themeDir()];
+
+		$GLOBALS['settings'] = ['default_theme_dir' => self::themeDir()];
 
 		$GLOBALS['txt'] = [
 			'pl_title'                          => 'Plugin Manager',
@@ -75,6 +79,9 @@ final class TestEnvironment
 		$GLOBALS['boardurl']  = 'https://example.test';
 
 		unset($GLOBALS['smf_json_decode_override']);
+
+		$_REQUEST = [];
+		$_FILES   = [];
 
 		foreach ($globalOverrides as $name => $value) {
 			$GLOBALS[$name] = $value;

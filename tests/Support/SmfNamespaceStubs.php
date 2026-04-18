@@ -81,6 +81,26 @@ function updateSettingsFile(array $settings): void
 	SmfTestState::record('updateSettingsFile', $settings);
 }
 
+function deltree(string $path): void
+{
+	SmfTestState::record('deltree', $path);
+
+	if (! is_dir($path)) {
+		return;
+	}
+
+	$iterator = new RecursiveIteratorIterator(
+		new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+		RecursiveIteratorIterator::CHILD_FIRST,
+	);
+
+	foreach ($iterator as $item) {
+		$item->isDir() ? rmdir($item->getPathname()) : unlink($item->getPathname());
+	}
+
+	rmdir($path);
+}
+
 function call_helper(callable $callable): mixed
 {
 	return $callable();
