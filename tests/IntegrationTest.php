@@ -14,6 +14,7 @@ use Testo\Assert;
 use Testo\Test;
 use Tests\Support\SmfTestState;
 use Tests\Support\TestEnvironment;
+use ZipArchive;
 
 final class IntegrationTest
 {
@@ -164,6 +165,70 @@ XML,
 	}
 
 	#[Test]
+	public function extractPackageRejectsZipWithPathTraversalEntries(): void
+	{
+		TestEnvironment::reset();
+
+		$zipPath = $this->createZipArchive([
+			'demo/plugin-info.xml' => <<<'XML'
+<?xml version="1.0"?>
+<plugin id="Author:Demo"></plugin>
+XML,
+			'../escape.txt' => 'escape',
+		]);
+
+		$_REQUEST = ['get' => 1];
+		$_FILES = [
+			'package' => [
+				'name'     => 'demo.zip',
+				'type'     => 'application/zip',
+				'tmp_name' => $zipPath,
+				'error'    => UPLOAD_ERR_OK,
+			],
+		];
+
+		$integration = new Integration();
+
+		Assert::false($this->invokePrivate($integration, 'extractPackage'));
+		Assert::same($GLOBALS['context']['upload_error'], 'Wrong file');
+		Assert::false(is_file(dirname(PLUGINS_DIR) . '/escape.txt'));
+
+		unlink($zipPath);
+	}
+
+	#[Test]
+	public function extractPackageAcceptsZipWithPluginFilesOnly(): void
+	{
+		TestEnvironment::reset();
+
+		$zipPath = $this->createZipArchive([
+			'demo/plugin-info.xml' => <<<'XML'
+<?xml version="1.0"?>
+<plugin id="Author:Demo"></plugin>
+XML,
+			'demo/readme.txt' => 'ok',
+		]);
+
+		$_REQUEST = ['get' => 1];
+		$_FILES = [
+			'package' => [
+				'name'     => 'demo.zip',
+				'type'     => 'application/zip',
+				'tmp_name' => $zipPath,
+				'error'    => UPLOAD_ERR_OK,
+			],
+		];
+
+		$integration = new Integration();
+
+		Assert::true($this->invokePrivate($integration, 'extractPackage'));
+		Assert::true(is_file(PLUGINS_DIR . '/demo/plugin-info.xml'));
+		Assert::true(is_file(PLUGINS_DIR . '/demo/readme.txt'));
+
+		unlink($zipPath);
+	}
+
+	#[Test]
 	public function handleToggleValidatesSessionBeforeReadingPayload(): void
 	{
 		TestEnvironment::reset();
@@ -279,8 +344,30 @@ XML,
 	private function invokePrivate(object $object, string $method, mixed ...$arguments): mixed
 	{
 		$reflection = new ReflectionMethod($object, $method);
-		$reflection->setAccessible(true);
 
 		return $reflection->invoke($object, ...$arguments);
+	}
+
+	private function createZipArchive(array $files): string
+	{
+		$path = tempnam(sys_get_temp_dir(), 'plugin-loader-zip-');
+
+		if ($path === false) {
+			throw new RuntimeException('Unable to create temporary ZIP file.');
+		}
+
+		$zip = new ZipArchive();
+
+		if ($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+			throw new RuntimeException('Unable to open temporary ZIP file.');
+		}
+
+		foreach ($files as $name => $contents) {
+			$zip->addFromString($name, $contents);
+		}
+
+		$zip->close();
+
+		return $path;
 	}
 }

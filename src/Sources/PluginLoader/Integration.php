@@ -450,6 +450,12 @@ final class Integration
 		if ($result === true) {
 			$plugin = pathinfo((string) $package['name'], PATHINFO_FILENAME);
 
+			if (! $this->hasSafeZipEntryPaths($zip)) {
+				$this->context['upload_error'] = $this->txt['pl_upload_wrong_file'];
+
+				return false;
+			}
+
 			if ($zip->locateName($plugin . '/plugin-info.xml') !== false) {
 				return $zip->extractTo(PLUGINS_DIR);
 			} elseif ($zip->locateName('plugin-info.xml') !== false) {
@@ -462,5 +468,33 @@ final class Integration
 		}
 
 		return false;
+	}
+
+	private function hasSafeZipEntryPaths(ZipArchive $zip): bool
+	{
+		for ($index = 0; $index < $zip->numFiles; $index++) {
+			$entry = $zip->getNameIndex($index);
+
+			if ($entry === false || ! $this->isSafeZipEntryPath($entry)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private function isSafeZipEntryPath(string $entry): bool
+	{
+		$entry = str_replace('\\', '/', $entry);
+
+		if ($entry === '' || str_starts_with($entry, '/') || preg_match('/^[A-Za-z]:\//', $entry) === 1) {
+			return false;
+		}
+
+		if (in_array('..', explode('/', $entry), true)) {
+			return false;
+		}
+
+		return true;
 	}
 }
