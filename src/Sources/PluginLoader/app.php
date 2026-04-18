@@ -52,10 +52,28 @@ foreach ($enabledPlugins as $plugin) {
 	$file = PLUGINS_DIR . '/' . $plugin . '/sources/plugin.php';
 
 	if (is_file($file)) {
-		$pluginInstance = require_once $file;
+		try {
+			$pluginInstance = require_once $file;
 
-		if ($pluginInstance instanceof Plugin) {
+			if (! $pluginInstance instanceof Plugin) {
+				log_error(
+					'Plugin Loader: failed to bootstrap plugin "' . $plugin . '": invalid plugin instance.',
+					'general',
+					__FILE__,
+					__LINE__,
+				);
+
+				continue;
+			}
+
 			$pluginInstance();
+		} catch (Throwable $exception) {
+			log_error(
+				'Plugin Loader: failed to bootstrap plugin "' . $plugin . '": ' . $exception->getMessage(),
+				'general',
+				__FILE__,
+				__LINE__,
+			);
 		}
 	}
 }

@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Bugo\PluginLoader;
+require_once __DIR__ . '/SmfTestState.php';
 
-use RuntimeException;
 use Tests\Support\SmfTestState;
 
 function add_integration_function(string $hook, string $callback, bool $permanent, string $file): void
@@ -15,6 +14,18 @@ function add_integration_function(string $hook, string $callback, bool $permanen
 		'permanent' => $permanent,
 		'file'      => $file,
 	]);
+}
+
+function log_error($error_message, $error_type = 'general', $file = null, $line = null)
+{
+	SmfTestState::record('logged_errors', [
+		'message' => $error_message,
+		'type'    => $error_type,
+		'file'    => $file,
+		'line'    => $line,
+	]);
+
+	return $error_message;
 }
 
 function loadLanguage(string $name): void

@@ -6,9 +6,13 @@ namespace Tests;
 
 require_once __DIR__ . '/Support/Bootstrap.php';
 
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use RuntimeException;
 use Testo\Assert;
 use Testo\Test;
+use Tests\Support\SmfTestState;
 use Tests\Support\TestEnvironment;
 
 final class AppTest
@@ -36,6 +40,28 @@ final class AppTest
 			'integrate_update_settings_file',
 			'integrate_admin_areas',
 		]);
+	}
+
+	#[Test]
+	public function appContinuesBootstrappingOtherPluginsAfterFailure(): void
+	{
+		$result = $this->runApp('INDEX', 'broken,demo');
+
+		Assert::same(array_column($result['hooks'], 'hook'), [
+			'integrate_update_settings_file',
+			'integrate_admin_areas',
+			'integrate_test_plugin',
+		]);
+		$loggedError = $result['logged_errors'][0];
+
+		Assert::same(count($result['logged_errors']), 1);
+		Assert::true(str_contains($loggedError['message'], 'failed to bootstrap plugin "broken"'));
+		Assert::true(str_contains($loggedError['message'], 'Broken plugin bootstrap'));
+		Assert::same($loggedError['type'], 'general');
+		Assert::same(
+			str_replace('\\', '/', (string) $loggedError['file']),
+			str_replace('\\', '/', $result['app_path'])
+		);
 	}
 
 	private function runApp(string $smfMode, string $plugins): array
@@ -67,32 +93,23 @@ $GLOBALS['settings'] = [];
 $GLOBALS['txt'] = [];
 $GLOBALS['smcFunc'] = [];
 
-$hooks = [];
-
-function add_integration_function(string $hook, string $callback, bool $permanent, string $file): void
-{
-	global $hooks;
-
-	$hooks[] = [
-		'hook' => $hook,
-		'callback' => $callback,
-		'permanent' => $permanent,
-		'file' => $file,
-	];
-}
+require '__STUBS__';
 
 require '__APP__';
 
 echo json_encode([
 	'plugins_dir' => PLUGINS_DIR,
 	'plugins_url' => PLUGINS_URL,
-	'hooks' => $hooks,
+	'hooks' => \Tests\Support\SmfTestState::all('hooks'),
+	'logged_errors' => \Tests\Support\SmfTestState::all('logged_errors'),
+	'app_path' => '__APP__',
 ], JSON_THROW_ON_ERROR);
 PHP, [
 			'__SMF__'      => $smfMode,
 			'__BOARDDIR__' => addslashes($caseRoot),
 			'__PLUGINS__'  => $plugins,
 			'__APP__'      => addslashes($appPath),
+			'__STUBS__'    => addslashes(__DIR__ . '/Support/SmfNamespaceStubs.php'),
 		]));
 
 		$output = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($scriptPath));
@@ -101,8 +118,17 @@ PHP, [
 			throw new RuntimeException('Failed to execute app.php in a subprocess.');
 		}
 
-		/** @var array{plugins_dir: string, plugins_url: string, hooks: list<array{hook: string, callback: string, permanent: bool, file: string}>} $result */
+		/** @var array{
+		 *     plugins_dir: string,
+		 *     plugins_url: string,
+		 *     hooks: list<array{hook: string, callback: string, permanent: bool, file: string}>,
+		 *     logged_errors: list<array{message: string, type: string|bool, file: ?string, line: ?int}>,
+		 *     app_path: string
+         *  } $result
+		 **/
 		$result = json_decode($output, true, 512, JSON_THROW_ON_ERROR);
+
+		SmfTestState::reset();
 
 		return $result;
 	}
@@ -112,6 +138,7 @@ PHP, [
 		$this->removeDir($caseRoot);
 
 		mkdir($caseRoot . '/Plugins/demo/sources', 0777, true);
+		mkdir($caseRoot . '/Plugins/broken/sources', 0777, true);
 		mkdir($caseRoot . '/Sources', 0777, true);
 
 		file_put_contents($caseRoot . '/Plugins/demo/sources/plugin.php', <<<'PHP'
@@ -130,6 +157,12 @@ return new class extends Plugin
 	}
 };
 PHP);
+
+		file_put_contents($caseRoot . '/Plugins/broken/sources/plugin.php', <<<'PHP'
+<?php
+
+throw new RuntimeException('Broken plugin bootstrap');
+PHP);
 	}
 
 	private function removeDir(string $directory): void
@@ -138,9 +171,9 @@ PHP);
 			return;
 		}
 
-		$items = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
-			\RecursiveIteratorIterator::CHILD_FIRST,
+		$items = new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+			RecursiveIteratorIterator::CHILD_FIRST,
 		);
 
 		foreach ($items as $item) {
