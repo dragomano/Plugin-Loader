@@ -109,7 +109,7 @@ use Bugo\PluginLoader\Plugin;
 if (!defined('SMF'))
 	die('No direct access...');
 
-return class extends Plugin
+return new class extends Plugin
 {
 	public const NAME = 'example';
 
